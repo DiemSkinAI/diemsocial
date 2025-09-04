@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         model: 'gemini-1.5-flash'
       })
       
-      const analysisPrompt = `You are interior designer specialized in kitchen stone designing (countertops, backsplashes). Describe the stone material in this photo.`
+      const analysisPrompt = `You are a professional stone and countertop specialist. Analyze this stone/marble image and provide an extremely detailed description focusing on: 1) Exact color (white, beige, gray tones), 2) Specific veining patterns (direction, thickness, color of veins), 3) Stone type (marble, granite, quartz), 4) Surface finish (polished, honed, etc), 5) Any unique characteristics. Be very specific about the veining pattern and colors to ensure exact replication.`
 
       const analysisResult = await inspirationAnalysisModel.generateContent([
         { text: analysisPrompt },
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       console.log(`[${new Date().toISOString()}] AI detected material: ${materialDescription}`)
       
       // Step 2: Use the detected material description in the main prompt
-      promptText = `You are interior designer specialized in kitchen stone designing (countertops, backsplashes). Change stone surfaces to: ${materialDescription}`
+      promptText = `You are an expert interior designer specializing in kitchen stone design. Transform the countertops and stone surfaces in this kitchen to EXACTLY match this description: ${materialDescription}. Pay special attention to replicating the exact veining patterns, colors, and surface characteristics. The result must be a precise visual match to the reference material.`
       
       // Update parts array to only include room image for generation step (mask already analyzed)
       parts = [roomImageFile, { text: promptText }]
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
         model: 'gemini-1.5-flash'
       })
       
-      const analysisPrompt = `You are interior designer specialized in kitchen stone designing (countertops, backsplashes). Describe the stone material in this photo.`
+      const analysisPrompt = `You are a professional stone and countertop specialist. Analyze this stone/marble image and provide an extremely detailed description focusing on: 1) Exact color (white, beige, gray tones), 2) Specific veining patterns (direction, thickness, color of veins), 3) Stone type (marble, granite, quartz), 4) Surface finish (polished, honed, etc), 5) Any unique characteristics. Be very specific about the veining pattern and colors to ensure exact replication.`
 
       const analysisResult = await inspirationAnalysisModel.generateContent([
         { text: analysisPrompt },
@@ -148,13 +148,13 @@ export async function POST(request: NextRequest) {
       const combinedDescription = `${materialDescription}. Additional details: ${description}`
       console.log(`[${new Date().toISOString()}] Combined description: ${combinedDescription}`)
       
-      promptText = `You are interior designer specialized in kitchen stone designing (countertops, backsplashes). Change stone surfaces to: ${combinedDescription}`
+      promptText = `You are an expert interior designer specializing in kitchen stone design. Transform the countertops and stone surfaces in this kitchen to EXACTLY match this description: ${combinedDescription}. Pay special attention to replicating the exact veining patterns, colors, and surface characteristics. The result must be a precise visual match to the reference material.`
       
       // Update parts array to only include room image for generation step (mask already analyzed)
       parts = [roomImageFile, { text: promptText }]
     } else {
       // Description only workflow
-      promptText = `You are interior designer specialized in kitchen stone designing (countertops, backsplashes). Change stone surfaces to: ${description}`
+      promptText = `You are an expert interior designer specializing in kitchen stone design. Transform the countertops and stone surfaces in this kitchen to match this description: ${description}. Pay attention to creating realistic stone characteristics and patterns.`
     }
 
     // Add text prompt (only if parts wasn't already modified in inspiration workflow)

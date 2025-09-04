@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Upload, Camera, Mic, ArrowUp, Sparkles } from 'lucide-react'
+import { Upload, Camera, Mic, ArrowUp, Sparkles, Image } from 'lucide-react'
 import { compressImage, fileToBase64 } from '@/lib/imageUtils'
 import BeforeAfterSlider from '@/components/BeforeAfterSlider'
+import CameraCapture from '@/components/CameraCapture'
 
 export default function Home() {
   const [roomImage, setRoomImage] = useState<File | null>(null)
@@ -15,6 +16,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [refinementPrompt, setRefinementPrompt] = useState('')
   const [isRefining, setIsRefining] = useState(false)
+  const [showBorderAnimation, setShowBorderAnimation] = useState(false)
+  const [showCamera, setShowCamera] = useState(false)
+  const [originalPrompt, setOriginalPrompt] = useState('')
+
+  const triggerBorderAnimation = () => {
+    setShowBorderAnimation(true)
+    setTimeout(() => setShowBorderAnimation(false), 4000) // 4 seconds as requested
+  }
 
   const handleSubmit = async () => {
     if (!roomImage) {
@@ -64,6 +73,8 @@ export default function Home() {
       }
 
       setResults(data.images)
+      // Store the original prompt for future refinements
+      setOriginalPrompt(prompt)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
@@ -81,6 +92,21 @@ export default function Home() {
     if (file) setInspirationImage(file)
   }
 
+  const handleCameraClick = () => {
+    setShowCamera(true)
+  }
+
+  const handleCameraCapture = (imageData: string) => {
+    // Convert base64 to File object
+    fetch(imageData)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' })
+        setRoomImage(file)
+        setShowCamera(false)
+      })
+  }
+
   const handleReset = () => {
     setResults([])
     setRoomImage(null)
@@ -89,6 +115,7 @@ export default function Home() {
     setOriginalImageUrl('')
     setError(null)
     setRefinementPrompt('')
+    setOriginalPrompt('')
   }
 
   const handleRefinement = async () => {
@@ -105,7 +132,11 @@ export default function Home() {
       
       // Use the AFTER image (latest result) as the new room image
       formData.append('roomImage', results[0].url)
-      formData.append('description', refinementPrompt)
+      // Combine original context with refinement for better AI understanding
+      const contextualPrompt = originalPrompt 
+        ? `Previous request: "${originalPrompt}". Additional change: ${refinementPrompt}`
+        : refinementPrompt
+      formData.append('description', contextualPrompt)
 
       const response = await fetch('/api/visualize', {
         method: 'POST',
@@ -134,7 +165,7 @@ export default function Home() {
 
   if (results.length > 0) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white">
+      <div className="min-h-screen text-white" style={{ backgroundColor: '#101218' }}>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-light">Your Visualization</h1>
@@ -163,7 +194,7 @@ export default function Home() {
 
           {/* Chat Interface for Refinements */}
           <div className="mt-8">
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl border border-gray-700/50 p-4">
+            <div className="backdrop-blur-sm rounded-3xl border border-gray-700/30 p-4" style={{ backgroundColor: '#1D1E26' }}>
               <div className="flex items-center gap-4">
                 <textarea
                   value={refinementPrompt}
@@ -225,19 +256,19 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
+    <div className="min-h-screen text-white relative overflow-hidden" style={{ backgroundColor: '#101218' }}>
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #101218 0%, #0f1117 50%, #101218 100%)' }}></div>
       
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
         
         {/* Header */}
         <div className="mb-16 text-center">
-          <h1 className="text-6xl font-light mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+          <h1 className="text-6xl font-bold mb-4 text-white">
             Meet DiemVision
           </h1>
-          <p className="text-xl text-gray-400 font-light">
+          <p className="text-xl font-semibold" style={{ color: '#7F8188' }}>
             Transform your kitchen countertops with AI
           </p>
         </div>
@@ -246,7 +277,7 @@ export default function Home() {
         <div className="w-full max-w-2xl">
           <div className="relative">
             {/* Input Container */}
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl border border-gray-700/50 p-4 hover:border-gray-600/50 transition-all duration-300">
+            <div className={`relative backdrop-blur-sm rounded-3xl border border-gray-700/30 p-4 hover:border-gray-600/30 transition-all duration-300 animated-border ${showBorderAnimation ? 'active' : ''}`} style={{ backgroundColor: '#1D1E26' }}>
               
               {/* File Previews */}
               {(roomImage || inspirationImage) && (
@@ -258,8 +289,8 @@ export default function Home() {
                         alt="Room" 
                         className="w-16 h-16 object-cover rounded-lg"
                       />
-                      <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                        Room
+                      <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] px-2 py-1 rounded-full">
+                        My Kitchen
                       </div>
                     </div>
                   )}
@@ -283,8 +314,9 @@ export default function Home() {
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Describe your dream countertop or upload photos..."
-                  className="flex-1 bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none text-lg min-h-[60px] py-4"
+                  onFocus={triggerBorderAnimation}
+                  placeholder="Upload kitchen photo and describe changes..."
+                  className="flex-1 bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none text-lg min-h-[80px] py-6"
                   rows={1}
                   style={{ height: 'auto' }}
                   onInput={(e) => {
@@ -296,7 +328,15 @@ export default function Home() {
                 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2">
-                  {/* Upload Room Photo */}
+                  {/* Take Photo with Camera */}
+                  <button 
+                    onClick={handleCameraClick}
+                    className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors"
+                  >
+                    <Camera className="w-6 h-6 text-gray-400 hover:text-white transition-colors" />
+                  </button>
+
+                  {/* Upload Room Photo from Device */}
                   <label className="cursor-pointer p-2 hover:bg-gray-700/50 rounded-lg transition-colors">
                     <input
                       type="file"
@@ -304,19 +344,9 @@ export default function Home() {
                       onChange={handleRoomImageUpload}
                       className="hidden"
                     />
-                    <Camera className="w-6 h-6 text-gray-400 hover:text-white transition-colors" />
+                    <Image className="w-6 h-6 text-gray-400 hover:text-white transition-colors" />
                   </label>
 
-                  {/* Upload Inspiration */}
-                  <label className="cursor-pointer p-2 hover:bg-gray-700/50 rounded-lg transition-colors">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleInspirationUpload}
-                      className="hidden"
-                    />
-                    <Upload className="w-6 h-6 text-gray-400 hover:text-white transition-colors" />
-                  </label>
 
                   {/* Submit Button */}
                   <button
@@ -345,9 +375,9 @@ export default function Home() {
           {/* Suggestions */}
           <div className="mt-8 space-y-2">
             {[
-              'White Carrara marble countertops with gray veining',
-              'Black granite island with waterfall edge',
-              'Transform my backsplash to match new countertops'
+              'Use white marble with subtle gray veining',
+              'Change to black granite with polished finish',
+              'Apply Calacatta marble pattern throughout'
             ].map((suggestion, index) => (
               <button
                 key={index}
@@ -370,6 +400,14 @@ export default function Home() {
               <p className="text-sm text-gray-400 mt-2">This may take 15-30 seconds</p>
             </div>
           </div>
+        )}
+
+        {/* Camera Capture Modal */}
+        {showCamera && (
+          <CameraCapture
+            onCapture={handleCameraCapture}
+            onClose={() => setShowCamera(false)}
+          />
         )}
       </div>
     </div>
