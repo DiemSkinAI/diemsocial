@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const errorTime = Date.now() - startTime;
     console.error(`[${new Date().toISOString()}] Error after ${errorTime}ms:`, error);
-    console.error('Error stack:', error.stack);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
 
     // Categorize errors for better user feedback
     let errorMessage = 'Failed to process texture replacement';

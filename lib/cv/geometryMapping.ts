@@ -422,6 +422,7 @@ export class GeometryMapper {
     ];
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private calculatePerspectiveConfidence(corners: Quadrilateral, mask: Uint8Array, width: number, height: number): number {
     // Calculate confidence based on:
     // 1. How well the corners form a reasonable quadrilateral
