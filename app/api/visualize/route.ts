@@ -283,6 +283,17 @@ Generate a new photo of this exact same person based on the following request: "
         )
       }
 
+      // Handle payload too large errors
+      if (error instanceof Error && (error.message?.includes('payload') || error.message?.includes('too large') || error.message?.includes('413') || error.message?.includes('Request Entity Too Large'))) {
+        return NextResponse.json(
+          { 
+            error: 'Photos are too large. Please use smaller images or try taking new photos with lower resolution.',
+            processingTime: errorTime
+          },
+          { status: 413 }
+        )
+      }
+
       // Handle 500 Internal Server Errors from Vertex AI
       if (error instanceof Error && (error.message?.includes('500') || error.message?.includes('Internal Server Error') || error.message?.includes('Internal error encountered'))) {
         return NextResponse.json(
