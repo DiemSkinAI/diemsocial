@@ -25,7 +25,7 @@ export default function Home() {
 
   // Track user session (production only)
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') return
+    if (window.location.hostname === 'localhost') return
     
     const trackSession = async () => {
       try {
@@ -145,7 +145,7 @@ export default function Home() {
       setResults(data.images)
 
       // Track successful generation (production only)
-      if (process.env.NODE_ENV === 'production') {
+      if (window.location.hostname !== 'localhost') {
         try {
           await fetch('/api/track-analytics', {
             method: 'POST',
@@ -171,7 +171,7 @@ export default function Home() {
       setError(errorMessage)
 
       // Track failed generation (production only)
-      if (process.env.NODE_ENV === 'production') {
+      if (window.location.hostname !== 'localhost') {
         try {
           await fetch('/api/track-analytics', {
             method: 'POST',
