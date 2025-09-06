@@ -25,11 +25,18 @@ export default function Home() {
 
   // Track user session (production only)
   useEffect(() => {
+    console.log('Session tracking check:', {
+      hostname: window.location.hostname,
+      isLocalhost: window.location.hostname === 'localhost',
+      sessionId
+    })
+    
     if (window.location.hostname === 'localhost') return
     
     const trackSession = async () => {
       try {
-        await fetch('/api/track-session', {
+        console.log('Attempting to track session:', sessionId)
+        const response = await fetch('/api/track-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -38,8 +45,10 @@ export default function Home() {
             timestamp: new Date().toISOString()
           })
         })
-      } catch {
-        console.log('Session tracking disabled (database not connected)')
+        const result = await response.json()
+        console.log('Session tracking result:', result)
+      } catch (error) {
+        console.error('Session tracking error:', error)
       }
     }
     trackSession()
@@ -147,7 +156,8 @@ export default function Home() {
       // Track successful generation (production only)
       if (window.location.hostname !== 'localhost') {
         try {
-          await fetch('/api/track-analytics', {
+          console.log('Tracking successful generation for session:', sessionId)
+          const analyticsResponse = await fetch('/api/track-analytics', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -161,8 +171,10 @@ export default function Home() {
               processingTime
             })
           })
-        } catch {
-          console.log('Analytics tracking disabled (database not connected)')
+          const analyticsResult = await analyticsResponse.json()
+          console.log('Analytics tracking result:', analyticsResult)
+        } catch (error) {
+          console.error('Analytics tracking error:', error)
         }
       }
     } catch (error) {
