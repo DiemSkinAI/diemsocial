@@ -537,6 +537,15 @@ export default function Home() {
             onClose={() => setShowCamera(false)}
           />
         )}
+
+        {/* Made in Toronto badge */}
+        <div className="fixed bottom-4 right-4 z-40">
+          <img 
+            src="/madein.jpeg" 
+            alt="Made in Toronto" 
+            className="w-24 md:w-32 opacity-80 hover:opacity-100 transition-opacity"
+          />
+        </div>
         </div>
       </div>
     </>
