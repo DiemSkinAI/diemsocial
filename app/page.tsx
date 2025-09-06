@@ -152,9 +152,9 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId,
-              frontFacePhoto: frontBase64.substring(0, 100) + '...', // Store preview only
-              sideFacePhoto: sideBase64.substring(0, 100) + '...',
-              fullBodyPhoto: fullBase64.substring(0, 100) + '...',
+              frontFacePhoto: frontBase64, // Store full image data
+              sideFacePhoto: sideBase64,
+              fullBodyPhoto: fullBase64,
               promptText: prompt,
               generatedImage: data.images?.[0]?.url || null,
               success: true,
