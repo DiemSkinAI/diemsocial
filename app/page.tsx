@@ -275,7 +275,7 @@ export default function Home() {
       `}</style>
       <div className="min-h-screen text-white relative overflow-hidden" style={{ backgroundColor: '#000000' }}>
         {/* Hamburger Menu */}
-        <div className="fixed top-4 left-4 z-50">
+        <div className="absolute md:fixed top-4 left-4 z-50">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-3 rounded-lg bg-black/20 backdrop-blur-sm border border-white/20 hover:bg-black/40 transition-all"
@@ -538,14 +538,15 @@ export default function Home() {
           />
         )}
 
-        {/* Made in Toronto badge */}
-        <div className="fixed bottom-4 right-4 z-40">
-          <img 
-            src="/madein.jpeg" 
-            alt="Made in Toronto" 
-            className="w-24 md:w-32 opacity-80 hover:opacity-100 transition-opacity"
-          />
         </div>
+        
+        {/* Made in Toronto badge - at bottom of page content */}
+        <div className="flex justify-end p-4">
+          <img 
+            src="/toronto.png" 
+            alt="Made in Toronto" 
+            className="w-12 md:w-16 opacity-60 hover:opacity-80 transition-opacity"
+          />
         </div>
       </div>
     </>
