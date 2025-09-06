@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Camera, ArrowUp, Sparkles, Image, Download, User } from 'lucide-react'
 import { compressImage, fileToBase64 } from '@/lib/imageUtils'
 import CameraCapture from '@/components/CameraCapture'
@@ -16,10 +16,26 @@ export default function Home() {
   const [showBorderAnimation, setShowBorderAnimation] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
   const [currentPhotoType, setCurrentPhotoType] = useState<'front' | 'side' | 'full' | null>(null)
+  const [isTyping, setIsTyping] = useState(false)
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const triggerBorderAnimation = () => {
     setShowBorderAnimation(true)
     setTimeout(() => setShowBorderAnimation(false), 4000) // 4 seconds as requested
+  }
+
+  const handleTyping = () => {
+    setIsTyping(true)
+    
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+    
+    // Set new timeout to stop typing animation after 1 second of no input
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false)
+    }, 1000)
   }
 
   const handleSubmit = async () => {
@@ -190,9 +206,25 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden" style={{ backgroundColor: '#101218' }}>
-      {/* Background gradient */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #101218 0%, #0f1117 50%, #101218 100%)' }}></div>
+    <>
+      <style jsx>{`
+        .typing-pulse {
+          animation: typingPulse 1.5s ease-in-out infinite;
+          border-color: #3b82f6 !important;
+        }
+        
+        @keyframes typingPulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+          }
+          50% {
+            box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+          }
+        }
+      `}</style>
+      <div className="min-h-screen text-white relative overflow-hidden" style={{ backgroundColor: '#101218' }}>
+        {/* Background gradient */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #101218 0%, #0f1117 50%, #101218 100%)' }}></div>
       
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
@@ -226,7 +258,7 @@ export default function Home() {
                       <img src={URL.createObjectURL(frontFaceImage)} alt="Front Face" className="w-full h-32 object-cover rounded-lg" />
                     ) : (
                       <div className="h-32 flex flex-col items-center justify-center">
-                        <User className="w-8 h-8 text-gray-400 mb-2" />
+                        <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-xl mb-2">1</div>
                         <p className="text-xs text-gray-400">Front Face</p>
                       </div>
                     )}
@@ -254,7 +286,7 @@ export default function Home() {
                       <img src={URL.createObjectURL(sideFaceImage)} alt="Side Face" className="w-full h-32 object-cover rounded-lg" />
                     ) : (
                       <div className="h-32 flex flex-col items-center justify-center">
-                        <User className="w-8 h-8 text-gray-400 mb-2" />
+                        <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-xl mb-2">2</div>
                         <p className="text-xs text-gray-400">Side Face</p>
                       </div>
                     )}
@@ -282,7 +314,7 @@ export default function Home() {
                       <img src={URL.createObjectURL(fullBodyImage)} alt="Full Body" className="w-full h-32 object-cover rounded-lg" />
                     ) : (
                       <div className="h-32 flex flex-col items-center justify-center">
-                        <User className="w-8 h-8 text-gray-400 mb-2" />
+                        <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-xl mb-2">3</div>
                         <p className="text-xs text-gray-400">Full Body</p>
                       </div>
                     )}
@@ -300,7 +332,7 @@ export default function Home() {
 
           <div className="relative">
             {/* Input Container */}
-            <div className={`relative backdrop-blur-sm rounded-3xl border border-gray-700/30 p-4 hover:border-gray-600/30 transition-all duration-300 animated-border ${showBorderAnimation ? 'active' : ''}`} style={{ backgroundColor: '#1D1E26' }}>
+            <div className={`relative backdrop-blur-sm rounded-3xl border border-gray-700/30 p-4 hover:border-gray-600/30 transition-all duration-300 animated-border ${showBorderAnimation ? 'active' : ''} ${isTyping ? 'typing-pulse' : ''}`} style={{ backgroundColor: '#1D1E26' }}>
               
               {/* File Previews */}
               {(frontFaceImage || sideFaceImage || fullBodyImage) && (
@@ -350,6 +382,7 @@ export default function Home() {
                   value={prompt}
                   onChange={(e) => {
                     setPrompt(e.target.value)
+                    handleTyping()
                     // Auto-resize on content change
                     const target = e.target as HTMLTextAreaElement
                     target.style.height = 'auto'
@@ -425,7 +458,8 @@ export default function Home() {
             onClose={() => setShowCamera(false)}
           />
         )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
