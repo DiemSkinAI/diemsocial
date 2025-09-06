@@ -107,7 +107,7 @@ export async function insertUserAnalytics(analyticsData: {
   success: boolean
   errorMessage?: string
   processingTime?: number
-  metadata?: any
+  metadata?: unknown
 }) {
   const client = getPool()
   
