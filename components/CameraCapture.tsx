@@ -19,6 +19,7 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
     return () => {
       stopCamera()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const startCamera = async () => {

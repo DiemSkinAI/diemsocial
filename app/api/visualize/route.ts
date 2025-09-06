@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { VertexAI } from '@google-cloud/vertexai'
+// import { VertexAI } from '@google-cloud/vertexai' // Unused import
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // Helper function to add timeout to promises
@@ -13,7 +13,8 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: strin
 }
 
 // Convert base64 data URL to file format for Google AI
-function dataURLToFile(dataURL: string, filename: string) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function dataURLToFile(dataURL: string, filename?: string) {
   const [header, base64Data] = dataURL.split(',')
   const mimeType = header.match(/data:([^;]+)/)?.[1] || 'image/jpeg'
   
@@ -82,16 +83,16 @@ export async function POST(request: NextRequest) {
 
 
     // Prepare image data for Google AI
-    const frontFaceFile = dataURLToFile(frontFaceImage, 'front-face.jpg')
-    const sideFaceFile = dataURLToFile(sideFaceImage, 'side-face.jpg')
-    const fullBodyFile = dataURLToFile(fullBodyImage, 'full-body.jpg')
+    const frontFaceFile = dataURLToFile(frontFaceImage)
+    const sideFaceFile = dataURLToFile(sideFaceImage)
+    const fullBodyFile = dataURLToFile(fullBodyImage)
     
     // Extract original image dimensions from base64 data
     const base64Data = frontFaceImage.split(',')[1]
     const buffer = Buffer.from(base64Data, 'base64')
     console.log(`[${new Date().toISOString()}] Front face image buffer size: ${buffer.length} bytes`)
     
-    let parts: any[] = [frontFaceFile, sideFaceFile, fullBodyFile]
+    const parts: Array<{inlineData: {data: string; mimeType: string}} | {text: string}> = [frontFaceFile, sideFaceFile, fullBodyFile]
 
     // Single prompt template for initial generation
     const promptText = `You are an expert AI photo generator specializing in creating stunning social media content. You have been provided with three reference photos of a person:
@@ -145,11 +146,11 @@ Generate the requested image now.`
     let result;
     try {
       result = await withTimeout(generatePromise, GEMINI_TIMEOUT, 'Gemini API processing')
-    } catch (geminiError: any) {
+    } catch (geminiError: unknown) {
       console.error(`[${new Date().toISOString()}] Gemini API error:`, geminiError)
       
       // Check if this is an HTML response error
-      if (geminiError.message?.includes('Unexpected token') && geminiError.message?.includes('<!DOCTYPE')) {
+      if (geminiError instanceof Error && geminiError.message?.includes('Unexpected token') && geminiError.message?.includes('<!DOCTYPE')) {
         throw new Error('Gemini API returned an HTML error page. This usually means: 1) Invalid API key, 2) Model not available, or 3) API temporarily unavailable.')
       }
       
@@ -251,7 +252,7 @@ Generate the requested image now.`
       provider: 'gemini-api'
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     const errorTime = Date.now() - startTime
     console.error(`[${new Date().toISOString()}] Error after ${errorTime}ms:`, error)
     console.error('Error details:', error.message)
@@ -260,7 +261,7 @@ Generate the requested image now.`
     
     // Ensure we always return JSON, never HTML
     try {
-      if (error.message?.includes('timed out')) {
+      if (error instanceof Error && error.message?.includes('timed out')) {
         return NextResponse.json(
           { 
             error: 'Request timed out. The AI service is taking too long. Please try again.',
@@ -271,7 +272,7 @@ Generate the requested image now.`
       }
 
       // Handle Vertex AI authentication errors
-      if (error.message?.includes('credentials') || error.message?.includes('authentication') || error.message?.includes('permission')) {
+      if (error instanceof Error && (error.message?.includes('credentials') || error.message?.includes('authentication') || error.message?.includes('permission'))) {
         return NextResponse.json(
           { 
             error: 'Authentication failed. Please check your service account key and permissions.',
@@ -282,7 +283,7 @@ Generate the requested image now.`
       }
 
       // Handle quota/billing errors
-      if (error.message?.includes('quota') || error.message?.includes('billing') || error.message?.includes('429')) {
+      if (error instanceof Error && (error.message?.includes('quota') || error.message?.includes('billing') || error.message?.includes('429'))) {
         return NextResponse.json(
           { 
             error: 'API quota exceeded or billing issue. Please check your Google Cloud account and ensure billing is enabled.',
@@ -293,7 +294,7 @@ Generate the requested image now.`
       }
 
       // Handle 500 Internal Server Errors from Vertex AI
-      if (error.message?.includes('500') || error.message?.includes('Internal Server Error') || error.message?.includes('Internal error encountered')) {
+      if (error instanceof Error && (error.message?.includes('500') || error.message?.includes('Internal Server Error') || error.message?.includes('Internal error encountered'))) {
         return NextResponse.json(
           { 
             error: 'Vertex AI service is experiencing issues. This could be due to: 1) Service outage, 2) Quota/billing issues with your account, or 3) The model is temporarily unavailable. Please try again later or check your Google Cloud console.',
@@ -304,7 +305,7 @@ Generate the requested image now.`
       }
 
       // Handle model not found errors
-      if (error.message?.includes('404') || error.message?.includes('NOT_FOUND') || error.message?.includes('not found')) {
+      if (error instanceof Error && (error.message?.includes('404') || error.message?.includes('NOT_FOUND') || error.message?.includes('not found'))) {
         return NextResponse.json(
           { 
             error: 'Model not found or not accessible. The Gemini 2.5 Flash Image model may not be available in your region or project.',
@@ -321,11 +322,11 @@ Generate the requested image now.`
 
       return NextResponse.json(
         { 
-          error: error.message || 'Failed to process visualization. Please try again.',
+          error: error instanceof Error ? error.message : 'Failed to process visualization. Please try again.',
           processingTime: errorTime,
           debug: {
-            errorType: error.constructor.name,
-            stack: error.stack?.split('\n').slice(0, 3).join('\n')
+            errorType: error instanceof Error ? error.constructor.name : typeof error,
+            stack: error instanceof Error ? error.stack?.split('\n').slice(0, 3).join('\n') : undefined
           }
         },
         { status: 500 }

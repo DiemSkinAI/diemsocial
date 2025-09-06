@@ -102,7 +102,8 @@ export class GeometryMapper {
     return edges;
   }
 
-  private harrisCornerDetection(image: Jimp, edgePixels: Point2D[], boundingBox: any): Point2D[] {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private harrisCornerDetection(image: Jimp, edgePixels: Point2D[], boundingBox: unknown): Point2D[] {
     const { width, height, data } = image.bitmap;
     const corners: Array<{point: Point2D, strength: number}> = [];
     
@@ -169,7 +170,7 @@ export class GeometryMapper {
     return corners.slice(0, 20).map(c => c.point); // Top 20 corners
   }
 
-  private selectQuadrilateralCorners(corners: Point2D[], boundingBox: any): Quadrilateral {
+  private selectQuadrilateralCorners(corners: Point2D[], boundingBox: unknown): Quadrilateral {
     if (corners.length < 4) {
       // Fallback to bounding box corners if we don't have enough detected corners
       return {
@@ -334,6 +335,7 @@ export class GeometryMapper {
     return withAngles.map(item => item.point);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private computeHomography(corners: Quadrilateral, width: number, height: number): HomographyMatrix {
     // Define destination rectangle (normalized coordinates)
     const destWidth = 512; // Standard texture size
@@ -427,7 +429,7 @@ export class GeometryMapper {
     
     const quadArea = this.calculateQuadrilateralArea(corners);
     const maskArea = mask.reduce((sum, pixel) => sum + (pixel > 0 ? 1 : 0), 0);
-    const totalArea = width * height;
+    // const totalArea = width * height; // Unused variable
     
     // Area ratio confidence
     const areaRatio = Math.min(quadArea / maskArea, maskArea / quadArea);

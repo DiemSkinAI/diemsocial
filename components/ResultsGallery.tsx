@@ -196,7 +196,7 @@ export default function ResultsGallery({ images, originalImage, isLoading, onRes
         <div className="text-sm text-blue-700 dark:text-blue-300 mb-4">
           <p className="font-medium mb-2">Be specific about:</p>
           <ul className="list-disc list-inside space-y-1 text-left max-w-md mx-auto">
-            <li>Exact material name (e.g., "Calacatta Gold marble", "Absolute Black granite")</li>
+            <li>Exact material name (e.g., &quot;Calacatta Gold marble&quot;, &quot;Absolute Black granite&quot;)</li>
             <li>Surface finish (polished, honed, leathered)</li>
             <li>Edge profile (bullnose, straight, ogee)</li>
             <li>Which areas to change (countertops, backsplash, both)</li>

@@ -29,7 +29,7 @@ export default function ProcessingProgress({ steps, currentStep, isVisible }: Pr
         </div>
 
         <div className="space-y-4">
-          {steps.map((step, index) => {
+          {steps.map((step) => {
             const isActive = currentStep === step.id;
             const isCompleted = step.status === 'completed';
             const isProcessing = step.status === 'processing' || isActive;

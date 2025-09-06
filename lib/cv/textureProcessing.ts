@@ -1,5 +1,5 @@
 import * as Jimp from 'jimp';
-import sharp from 'sharp';
+// import sharp from 'sharp'; // Unused import
 
 export interface ProcessedTexture {
   albedo: Buffer; // Lighting-normalized texture
@@ -139,7 +139,7 @@ export class TextureProcessor {
 
   private calculateOptimalTileSize(width: number, height: number): number {
     const minSize = Math.min(width, height);
-    const maxSize = Math.max(width, height);
+    // const maxSize = Math.max(width, height); // Unused variable
     
     // Find the largest power of 2 that's <= minSize but >= 256
     let tileSize = 256;

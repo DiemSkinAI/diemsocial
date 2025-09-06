@@ -1,6 +1,9 @@
-import { CountertopSegmenter, SegmentationResult } from './cv/segmentation';
-import { TextureProcessor, ProcessedTexture } from './cv/textureProcessing';
-import { GeometryMapper, PerspectiveResult } from './cv/geometryMapping';
+import { CountertopSegmenter } from './cv/segmentation';
+// import type { SegmentationResult } from './cv/segmentation'; // Unused type
+import { TextureProcessor } from './cv/textureProcessing';
+// import type { ProcessedTexture } from './cv/textureProcessing'; // Unused type
+import { GeometryMapper } from './cv/geometryMapping';
+// import type { PerspectiveResult } from './cv/geometryMapping'; // Unused type
 import { RelightingEngine, LightingComponents, RelightingResult } from './cv/relighting';
 
 export interface TextureReplacementOptions {
@@ -209,7 +212,7 @@ export class TextureReplacementEngine {
     console.log(`Starting batch processing of ${kitchenImages.length} images...`);
     
     // Process material sample once for all images
-    const processedTexture = await this.textureProcessor.processTexture(materialSample);
+    // const processedTexture = await this.textureProcessor.processTexture(materialSample); // Unused variable
     
     const results: TextureReplacementResult[] = [];
     

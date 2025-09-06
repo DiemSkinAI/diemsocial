@@ -3,13 +3,14 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Camera, Upload, X } from 'lucide-react'
-import Image from 'next/image'
+// import Image from 'next/image' // Unused import
 
 interface RoomPhotoUploadProps {
   onImageSelect: (file: File) => void
   currentImage: File | null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function RoomPhotoUpload({ onImageSelect, currentImage }: RoomPhotoUploadProps) {
   const [preview, setPreview] = useState<string | null>(null)
   const [isCapturing, setIsCapturing] = useState(false)
@@ -84,7 +85,7 @@ export default function RoomPhotoUpload({ onImageSelect, currentImage }: RoomPho
 
   const removeImage = () => {
     setPreview(null)
-    onImageSelect(null as any)
+    onImageSelect(null as File)
   }
 
   return (

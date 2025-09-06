@@ -34,6 +34,7 @@ export class CountertopSegmenter {
     return await this.segmentWithEdgeDetection(imageBuffer);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async segmentWithSAM(imageBuffer: Buffer): Promise<SegmentationResult | null> {
     try {
       // Skip SAM for now due to API complexity - use edge detection instead

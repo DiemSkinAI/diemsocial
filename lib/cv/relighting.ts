@@ -32,7 +32,7 @@ export class RelightingEngine {
   ): Promise<RelightingResult> {
     
     const texture = await Jimp.read(textureBuffer);
-    const result = new Jimp(outputWidth, outputHeight);
+    // const result = new Jimp(outputWidth, outputHeight); // Unused variable
     
     // Resize shading to match output dimensions
     const resizedShading = this.resizeLightingComponents(
@@ -375,7 +375,7 @@ export class RelightingEngine {
     
     for (let y = 1; y < height - 1; y++) {
       for (let x = 1; x < width - 1; x++) {
-        const center = mask[y * width + x];
+        // const center = mask[y * width + x]; // Unused variable
         
         // Check if this pixel is on the boundary (has both masked and unmasked neighbors)
         const neighbors = [

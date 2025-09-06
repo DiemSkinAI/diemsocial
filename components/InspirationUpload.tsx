@@ -2,13 +2,14 @@
 
 import React, { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, X, Sparkles } from 'lucide-react'
+import { X, Sparkles } from 'lucide-react'
 
 interface InspirationUploadProps {
   onImageSelect: (file: File | null) => void
   currentImage: File | null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function InspirationUpload({ onImageSelect, currentImage }: InspirationUploadProps) {
   const [preview, setPreview] = useState<string | null>(null)
 

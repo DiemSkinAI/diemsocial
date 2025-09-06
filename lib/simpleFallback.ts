@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+// import { NextRequest, NextResponse } from 'next/server'; // Unused imports
 import sharp from 'sharp';
 
 export async function processImageWithFallback(

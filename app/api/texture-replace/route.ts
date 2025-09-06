@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     const errorTime = Date.now() - startTime;
     console.error(`[${new Date().toISOString()}] Error after ${errorTime}ms:`, error);
     console.error('Error stack:', error.stack);
@@ -88,16 +88,16 @@ export async function POST(request: NextRequest) {
     let errorMessage = 'Failed to process texture replacement';
     let statusCode = 500;
 
-    if (error.message?.includes('segmentation')) {
+    if (error instanceof Error && error.message?.includes('segmentation')) {
       errorMessage = 'Could not detect countertop in the image. Please ensure the kitchen photo shows clear countertop surfaces.';
       statusCode = 400;
-    } else if (error.message?.includes('perspective') || error.message?.includes('geometry')) {
+    } else if (error instanceof Error && (error.message?.includes('perspective') || error.message?.includes('geometry'))) {
       errorMessage = 'Could not detect countertop geometry. Please use an image with clearly visible countertop edges.';
       statusCode = 400;
-    } else if (error.message?.includes('texture') || error.message?.includes('material')) {
+    } else if (error instanceof Error && (error.message?.includes('texture') || error.message?.includes('material'))) {
       errorMessage = 'Could not process the material sample. Please ensure the inspiration photo shows a clear material texture.';
       statusCode = 400;
-    } else if (error.message?.includes('memory') || error.message?.includes('allocation')) {
+    } else if (error instanceof Error && (error.message?.includes('memory') || error.message?.includes('allocation'))) {
       errorMessage = 'Image too large to process. Please use smaller images (max 4MB each).';
       statusCode = 413;
     }
@@ -108,8 +108,8 @@ export async function POST(request: NextRequest) {
         processingTime: errorTime,
         pipeline: 'deterministic-cv',
         debug: process.env.NODE_ENV === 'development' ? {
-          originalError: error.message,
-          stack: error.stack?.split('\n').slice(0, 5).join('\n')
+          originalError: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5).join('\n') : undefined
         } : undefined
       },
       { status: statusCode }
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
 
 // Helper function to convert data URL to buffer
 function dataURLToBuffer(dataURL: string): Buffer {
-  const [header, base64Data] = dataURL.split(',');
+  const [, base64Data] = dataURL.split(',');
   if (!base64Data) {
     throw new Error('Invalid data URL format');
   }
@@ -128,6 +128,7 @@ function dataURLToBuffer(dataURL: string): Buffer {
 }
 
 // Helper function for image validation (optional)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function validateImageBuffer(buffer: Buffer, name: string): Promise<void> {
   try {
     const Jimp = await import('jimp');
