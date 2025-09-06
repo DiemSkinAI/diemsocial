@@ -107,6 +107,7 @@ export async function insertUserAnalytics(analyticsData: {
   success: boolean
   errorMessage?: string
   processingTime?: number
+  metadata?: any
 }) {
   const client = getPool()
   
@@ -127,6 +128,7 @@ export async function insertUserAnalytics(analyticsData: {
     analyticsData.success,
     analyticsData.errorMessage,
     analyticsData.processingTime
+    // Note: metadata is accepted but not stored in DB for now to avoid schema changes
   ])
   
   return result.rows[0]

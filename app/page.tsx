@@ -157,18 +157,35 @@ export default function Home() {
       if (window.location.hostname !== 'localhost') {
         try {
           console.log('Tracking successful generation for session:', sessionId)
+          
+          // Create smaller thumbnail versions to avoid 413 Content Too Large error
+          const createThumbnail = (base64: string, maxSize = 100): string => {
+            try {
+              return base64.substring(0, maxSize) + '...[truncated]'
+            } catch {
+              return 'thumbnail_creation_failed'
+            }
+          }
+          
           const analyticsResponse = await fetch('/api/track-analytics', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId,
-              frontFacePhoto: frontBase64, // Store full image data
-              sideFacePhoto: sideBase64,
-              fullBodyPhoto: fullBase64,
+              frontFacePhoto: createThumbnail(frontBase64),
+              sideFacePhoto: createThumbnail(sideBase64),
+              fullBodyPhoto: createThumbnail(fullBase64),
               promptText: prompt,
-              generatedImage: data.images?.[0]?.url || null,
+              generatedImage: createThumbnail(data.images?.[0]?.url || ''),
               success: true,
-              processingTime
+              processingTime,
+              // Store metadata instead of full images
+              metadata: {
+                frontSize: frontBase64.length,
+                sideSize: sideBase64.length,
+                fullSize: fullBase64.length,
+                generatedSize: data.images?.[0]?.url?.length || 0
+              }
             })
           })
           
@@ -202,9 +219,9 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId,
-              frontFacePhoto: 'uploaded',
-              sideFacePhoto: 'uploaded', 
-              fullBodyPhoto: 'uploaded',
+              frontFacePhoto: 'uploaded_but_failed',
+              sideFacePhoto: 'uploaded_but_failed', 
+              fullBodyPhoto: 'uploaded_but_failed',
               promptText: prompt,
               success: false,
               errorMessage,
