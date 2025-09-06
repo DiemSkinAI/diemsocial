@@ -162,7 +162,7 @@ export default function Home() {
           const createAnalyticsVersion = async (base64: string): Promise<string> => {
             try {
               // Create canvas to resize image
-              const img = new Image()
+              const img = document.createElement('img')
               img.src = base64
               
               return new Promise((resolve) => {
