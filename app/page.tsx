@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { Camera, ArrowUp, Sparkles, Image, Download, User } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Camera, ArrowUp, Sparkles, Image, Download, User, Menu, X } from 'lucide-react'
 import { compressImage, fileToBase64 } from '@/lib/imageUtils'
 import CameraCapture from '@/components/CameraCapture'
 
@@ -17,12 +17,22 @@ export default function Home() {
   const [showCamera, setShowCamera] = useState(false)
   const [currentPhotoType, setCurrentPhotoType] = useState<'front' | 'side' | 'full' | null>(null)
   const [isTyping, setIsTyping] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const triggerBorderAnimation = () => {
     setShowBorderAnimation(true)
     setTimeout(() => setShowBorderAnimation(false), 4000) // 4 seconds as requested
   }
+
+  // Trigger pulsating effect when component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      triggerBorderAnimation()
+    }, 1000) // Start after 1 second delay
+    
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleTyping = () => {
     setIsTyping(true)
@@ -159,7 +169,28 @@ export default function Home() {
 
   if (results.length > 0) {
     return (
-      <div className="min-h-screen text-white" style={{ backgroundColor: '#101218' }}>
+      <div className="min-h-screen text-white" style={{ backgroundColor: '#000000' }}>
+        {/* Hamburger Menu */}
+        <div className="fixed top-4 left-4 z-50">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-3 rounded-lg bg-black/20 backdrop-blur-sm border border-white/20 hover:bg-black/40 transition-all"
+          >
+            {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
+          </button>
+          
+          {isMenuOpen && (
+            <div className="absolute top-16 left-0 bg-black/90 backdrop-blur-sm rounded-lg border border-white/20 py-2 min-w-48">
+              <button className="w-full text-left px-4 py-3 text-white hover:bg-white/10 transition-colors">
+                About Us
+              </button>
+              <button className="w-full text-left px-4 py-3 text-white hover:bg-white/10 transition-colors">
+                Your Privacy
+              </button>
+            </div>
+          )}
+        </div>
+        
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-light">Your Generated Photo</h1>
@@ -213,6 +244,11 @@ export default function Home() {
           border-color: #3b82f6 !important;
         }
         
+        .animated-border.active {
+          animation: borderPulse 4s ease-in-out;
+          border-color: #3b82f6 !important;
+        }
+        
         @keyframes typingPulse {
           0%, 100% {
             box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
@@ -221,21 +257,64 @@ export default function Home() {
             box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
           }
         }
+        
+        @keyframes borderPulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            border-color: rgba(156, 163, 175, 0.3);
+          }
+          25%, 75% {
+            box-shadow: 0 0 0 12px rgba(59, 130, 246, 0);
+            border-color: #3b82f6;
+          }
+          50% {
+            box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+          }
+        }
       `}</style>
-      <div className="min-h-screen text-white relative overflow-hidden" style={{ backgroundColor: '#101218' }}>
+      <div className="min-h-screen text-white relative overflow-hidden" style={{ backgroundColor: '#000000' }}>
+        {/* Hamburger Menu */}
+        <div className="fixed top-4 left-4 z-50">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-3 rounded-lg bg-black/20 backdrop-blur-sm border border-white/20 hover:bg-black/40 transition-all"
+          >
+            {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
+          </button>
+          
+          {isMenuOpen && (
+            <div className="absolute top-16 left-0 bg-black/90 backdrop-blur-sm rounded-lg border border-white/20 py-2 min-w-48">
+              <button className="w-full text-left px-4 py-3 text-white hover:bg-white/10 transition-colors">
+                About Us
+              </button>
+              <button className="w-full text-left px-4 py-3 text-white hover:bg-white/10 transition-colors">
+                Your Privacy
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Background gradient */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #101218 0%, #0f1117 50%, #101218 100%)' }}></div>
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #000000 0%, #000000 50%, #000000 100%)' }}></div>
       
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 pt-16 md:pt-0">
         
         {/* Header */}
-        <div className="mb-16 text-center">
-          <h1 className="text-6xl font-bold mb-4 text-white">
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-8 md:mb-16 text-white">
             Meet DiemSocial
           </h1>
+          <div className="mb-4">
+            <img 
+              src="/innovation-awards.jpeg" 
+              alt="Innovation Awards 2025" 
+              className="mx-auto max-w-48 md:max-w-xs opacity-90"
+            />
+          </div>
           <p className="text-xl font-semibold" style={{ color: '#7F8188' }}>
-            Transform your photos with AI for stunning social media content
+            Your photos, on another level
           </p>
         </div>
 
@@ -255,10 +334,10 @@ export default function Home() {
                   />
                   <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-blue-500 transition-all text-center" style={{ backgroundColor: '#1D1E26' }}>
                     {frontFaceImage ? (
-                      <img src={URL.createObjectURL(frontFaceImage)} alt="Front Face" className="w-full h-32 object-cover rounded-lg" />
+                      <img src={URL.createObjectURL(frontFaceImage)} alt="Front Face" className="w-full h-20 md:h-28 object-cover rounded-lg" />
                     ) : (
-                      <div className="h-32 flex flex-col items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-xl mb-2">1</div>
+                      <div className="h-20 md:h-28 flex flex-col items-center justify-center">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-lg md:text-xl mb-1 md:mb-2">1</div>
                         <p className="text-xs text-gray-400">Front Face</p>
                       </div>
                     )}
@@ -283,10 +362,10 @@ export default function Home() {
                   />
                   <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-purple-500 transition-all text-center" style={{ backgroundColor: '#1D1E26' }}>
                     {sideFaceImage ? (
-                      <img src={URL.createObjectURL(sideFaceImage)} alt="Side Face" className="w-full h-32 object-cover rounded-lg" />
+                      <img src={URL.createObjectURL(sideFaceImage)} alt="Side Face" className="w-full h-20 md:h-28 object-cover rounded-lg" />
                     ) : (
-                      <div className="h-32 flex flex-col items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-xl mb-2">2</div>
+                      <div className="h-20 md:h-28 flex flex-col items-center justify-center">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-lg md:text-xl mb-1 md:mb-2">2</div>
                         <p className="text-xs text-gray-400">Side Face</p>
                       </div>
                     )}
@@ -311,10 +390,10 @@ export default function Home() {
                   />
                   <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-green-500 transition-all text-center" style={{ backgroundColor: '#1D1E26' }}>
                     {fullBodyImage ? (
-                      <img src={URL.createObjectURL(fullBodyImage)} alt="Full Body" className="w-full h-32 object-cover rounded-lg" />
+                      <img src={URL.createObjectURL(fullBodyImage)} alt="Full Body" className="w-full h-20 md:h-28 object-cover rounded-lg" />
                     ) : (
-                      <div className="h-32 flex flex-col items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-xl mb-2">3</div>
+                      <div className="h-20 md:h-28 flex flex-col items-center justify-center">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-lg md:text-xl mb-1 md:mb-2">3</div>
                         <p className="text-xs text-gray-400">Full Body</p>
                       </div>
                     )}
@@ -386,13 +465,13 @@ export default function Home() {
                     // Auto-resize on content change
                     const target = e.target as HTMLTextAreaElement
                     target.style.height = 'auto'
-                    target.style.height = Math.max(target.scrollHeight, 80) + 'px'
+                    target.style.height = Math.max(target.scrollHeight, 100) + 'px'
                   }}
                   onFocus={triggerBorderAnimation}
-                  placeholder="Upload your photos and describe what you want to create..."
-                  className="flex-1 bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none text-lg py-6 overflow-hidden"
+                  placeholder="Upload 3 photos of yourself and describe the scene you want to create..."
+                  className="flex-1 bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none text-base md:text-lg py-3 md:py-1 overflow-hidden"
                   rows={1}
-                  style={{ height: 'auto', minHeight: '80px' }}
+                  style={{ height: 'auto', minHeight: '100px' }}
                 />
                 
                 {/* Action Buttons */}
