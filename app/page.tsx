@@ -116,17 +116,16 @@ export default function Home() {
     setError(null)
     const startTime = Date.now()
 
+    // Encode all three photos at full size (outside try block for error handling)
+    const frontBase64 = await fileToBase64(frontFaceImage)
+    const sideBase64 = await fileToBase64(sideFaceImage)
+    const fullBase64 = await fileToBase64(fullBodyImage)
+
     try {
       const formData = new FormData()
       
-      // Encode all three photos at full size
-      const frontBase64 = await fileToBase64(frontFaceImage)
       formData.append('frontFaceImage', frontBase64)
-      
-      const sideBase64 = await fileToBase64(sideFaceImage)
       formData.append('sideFaceImage', sideBase64)
-      
-      const fullBase64 = await fileToBase64(fullBodyImage)
       formData.append('fullBodyImage', fullBase64)
       
       formData.append('description', prompt)
