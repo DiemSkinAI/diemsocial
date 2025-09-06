@@ -59,108 +59,61 @@ export async function POST(request: NextRequest) {
       )
     }
     const formData = await request.formData()
-    const roomImage = formData.get('roomImage') as string
-    const inspirationImage = formData.get('inspirationImage') as string | null
+    const frontFaceImage = formData.get('frontFaceImage') as string
+    const sideFaceImage = formData.get('sideFaceImage') as string
+    const fullBodyImage = formData.get('fullBodyImage') as string
     const description = formData.get('description') as string
 
     console.log(`[${new Date().toISOString()}] Form data extracted after ${Date.now() - startTime}ms`)
 
-    if (!roomImage) {
+    if (!frontFaceImage || !sideFaceImage || !fullBodyImage) {
       return NextResponse.json(
-        { error: 'Room image is required' },
+        { error: 'All three photos (front face, side face, full body) are required' },
         { status: 400 }
       )
     }
 
     if (!description || description.trim() === '') {
       return NextResponse.json(
-        { error: 'Please describe what changes you want' },
+        { error: 'Please describe what you want to create' },
         { status: 400 }
       )
     }
 
 
     // Prepare image data for Google AI
-    const roomImageFile = dataURLToFile(roomImage, 'room.jpg')
+    const frontFaceFile = dataURLToFile(frontFaceImage, 'front-face.jpg')
+    const sideFaceFile = dataURLToFile(sideFaceImage, 'side-face.jpg')
+    const fullBodyFile = dataURLToFile(fullBodyImage, 'full-body.jpg')
     
     // Extract original image dimensions from base64 data
-    const base64Data = roomImage.split(',')[1]
+    const base64Data = frontFaceImage.split(',')[1]
     const buffer = Buffer.from(base64Data, 'base64')
-    console.log(`[${new Date().toISOString()}] Original image buffer size: ${buffer.length} bytes`)
+    console.log(`[${new Date().toISOString()}] Front face image buffer size: ${buffer.length} bytes`)
     
-    let parts: any[] = [roomImageFile]
+    let parts: any[] = [frontFaceFile, sideFaceFile, fullBodyFile]
+
+    // Single prompt template for initial generation
+    const promptText = `You are an expert AI photo generator specializing in creating stunning social media content. You have been provided with three reference photos of a person:
+
+IMAGE 1: Front face photo - showing their facial features from the front
+IMAGE 2: Side face photo - showing their profile  
+IMAGE 3: Full body photo - showing their body proportions and stance
+
+Your task is to generate a new photo of this exact same person based on the following request: "${description}"
+
+CRITICAL REQUIREMENTS:
+- Maintain the exact facial features, skin tone, and body proportions from the reference photos
+- The person must be clearly recognizable as the same individual from the reference photos
+- Generate a high-quality, photorealistic image suitable for social media
+- Follow the outfit, location, and mood specified in the description
+- Ensure natural lighting and professional composition
+- The final image should look like a real photograph, not artificial or edited
+
+Generate the requested image now.`
     
-    if (inspirationImage) {
-      const inspirationImageFile = dataURLToFile(inspirationImage, 'inspiration.jpg')
-      parts.push(inspirationImageFile)
-    }
-
-
-    // Construct the prompt based on whether we have inspiration image and description
-    let promptText: string
-    
-    
-    if (inspirationImage && description === 'auto-detect-from-inspiration') {
-      // Two-step process: First analyze inspiration, then generate room modification
-      
-      // Step 1: Get material description from inspiration photo
-      console.log(`[${new Date().toISOString()}] Step 1: Analyzing inspiration photo for material description`)
-      
-      const inspirationAnalysisModel = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash'
-      })
-      
-      const analysisPrompt = `You are a professional stone and countertop specialist. Analyze this stone/marble image and provide an extremely detailed description focusing on: 1) Exact color (white, beige, gray tones), 2) Specific veining patterns (direction, thickness, color of veins), 3) Stone type (marble, granite, quartz), 4) Surface finish (polished, honed, etc), 5) Any unique characteristics. Be very specific about the veining pattern and colors to ensure exact replication.`
-
-      const analysisResult = await inspirationAnalysisModel.generateContent([
-        { text: analysisPrompt },
-        dataURLToFile(inspirationImage, 'inspiration.jpg')
-      ])
-      
-      const materialDescription = analysisResult.response.text().trim()
-      console.log(`[${new Date().toISOString()}] AI detected material: ${materialDescription}`)
-      
-      // Step 2: Use the detected material description in the main prompt
-      promptText = `You are an expert interior designer specializing in kitchen stone design. Transform the countertops and stone surfaces in this kitchen to EXACTLY match this description: ${materialDescription}. Pay special attention to replicating the exact veining patterns, colors, and surface characteristics. The result must be a precise visual match to the reference material.`
-      
-      // Update parts array to only include room image for generation step (mask already analyzed)
-      parts = [roomImageFile, { text: promptText }]
-    } else if (inspirationImage && description.trim()) {
-      // Both inspiration and description provided - extract material from inspiration and combine
-      console.log(`[${new Date().toISOString()}] Step 1: Analyzing inspiration photo to enhance user description`)
-      
-      const inspirationAnalysisModel = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash'
-      })
-      
-      const analysisPrompt = `You are a professional stone and countertop specialist. Analyze this stone/marble image and provide an extremely detailed description focusing on: 1) Exact color (white, beige, gray tones), 2) Specific veining patterns (direction, thickness, color of veins), 3) Stone type (marble, granite, quartz), 4) Surface finish (polished, honed, etc), 5) Any unique characteristics. Be very specific about the veining pattern and colors to ensure exact replication.`
-
-      const analysisResult = await inspirationAnalysisModel.generateContent([
-        { text: analysisPrompt },
-        dataURLToFile(inspirationImage, 'inspiration.jpg')
-      ])
-      
-      const materialDescription = analysisResult.response.text().trim()
-      console.log(`[${new Date().toISOString()}] AI detected material: ${materialDescription}`)
-      console.log(`[${new Date().toISOString()}] User description: ${description}`)
-      
-      // Combine AI-detected material with user's description
-      const combinedDescription = `${materialDescription}. Additional details: ${description}`
-      console.log(`[${new Date().toISOString()}] Combined description: ${combinedDescription}`)
-      
-      promptText = `You are an expert interior designer specializing in kitchen stone design. Transform the countertops and stone surfaces in this kitchen to EXACTLY match this description: ${combinedDescription}. Pay special attention to replicating the exact veining patterns, colors, and surface characteristics. The result must be a precise visual match to the reference material.`
-      
-      // Update parts array to only include room image for generation step (mask already analyzed)
-      parts = [roomImageFile, { text: promptText }]
-    } else {
-      // Description only workflow
-      promptText = `You are an expert interior designer specializing in kitchen stone design. Transform the countertops and stone surfaces in this kitchen to match this description: ${description}. Pay attention to creating realistic stone characteristics and patterns.`
-    }
-
-    // Add text prompt (only if parts wasn't already modified in inspiration workflow)
-    if (!inspirationImage || (inspirationImage && description.trim() && description !== 'auto-detect-from-inspiration')) {
-      parts.push({ text: promptText })
-    }
+    // Add text prompt to parts
+    parts.push({ text: promptText })
 
     console.log(`[${new Date().toISOString()}] Calling Gemini API for image generation`)
     const imageCount = parts.filter(p => typeof p === 'object' && 'inlineData' in p).length
@@ -172,7 +125,10 @@ export async function POST(request: NextRequest) {
     console.log(`[${new Date().toISOString()}] Using model: ${modelName} via Gemini API`)
     
     const model = genAI.getGenerativeModel({
-      model: modelName
+      model: modelName,
+      generationConfig: {
+        temperature: 0.1
+      }
     })
 
     // Generate content with timeout
@@ -253,14 +209,14 @@ export async function POST(request: NextRequest) {
     if (images.length === 0) {
       console.log(`[${new Date().toISOString()}] No images found in response, response structure:`, JSON.stringify(candidate, null, 2))
       
-      // Check if the response indicates no countertop was found
+      // Check if the response indicates an issue with person detection
       const responseText = candidate?.content?.parts?.[0]?.text || ''
-      if (responseText.toLowerCase().includes('countertop') && 
+      if (responseText.toLowerCase().includes('person') && 
           (responseText.toLowerCase().includes('not') || responseText.toLowerCase().includes("isn't") || 
-           responseText.toLowerCase().includes('no') || responseText.toLowerCase().includes('specify'))) {
+           responseText.toLowerCase().includes('no') || responseText.toLowerCase().includes('detect'))) {
         return NextResponse.json(
           { 
-            error: 'No countertop detected in the uploaded image. DiemVision specializes in countertop visualization and requires a clear view of existing countertops to generate accurate replacements. Please upload an image that includes a kitchen countertop.'
+            error: 'Could not properly detect the person in the uploaded photos. Please ensure all three photos (front face, side face, and full body) clearly show the same person with good lighting and visibility.'
           },
           { status: 400 }
         )
