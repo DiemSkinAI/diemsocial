@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { insertUserAnalytics } from '@/lib/database'
-import { uploadBase64ImageToStorage } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,56 +13,13 @@ export async function POST(request: NextRequest) {
       processingTime: analyticsData.processingTime
     })
 
-    // Images are already uploaded to Supabase, just use the URLs or upload if base64 provided
-    let frontFacePhotoUrl = analyticsData.frontFacePhoto
-    let sideFacePhotoUrl = analyticsData.sideFacePhoto
-    let fullBodyPhotoUrl = analyticsData.fullBodyPhoto
-    let generatedImageUrl = analyticsData.generatedImage
-
-    // If base64 data is provided instead of URL, upload to Supabase
-    if (analyticsData.frontFacePhoto && analyticsData.frontFacePhoto.startsWith('data:')) {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-      const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
-      frontFacePhotoUrl = await uploadBase64ImageToStorage(
-        analyticsData.frontFacePhoto,
-        `${sessionPrefix}_front_face.jpg`
-      )
-    }
-
-    if (analyticsData.sideFacePhoto && analyticsData.sideFacePhoto.startsWith('data:')) {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-      const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
-      sideFacePhotoUrl = await uploadBase64ImageToStorage(
-        analyticsData.sideFacePhoto,
-        `${sessionPrefix}_side_face.jpg`
-      )
-    }
-
-    if (analyticsData.fullBodyPhoto && analyticsData.fullBodyPhoto.startsWith('data:')) {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-      const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
-      fullBodyPhotoUrl = await uploadBase64ImageToStorage(
-        analyticsData.fullBodyPhoto,
-        `${sessionPrefix}_full_body.jpg`
-      )
-    }
-
-    if (analyticsData.generatedImage && analyticsData.generatedImage.startsWith('data:')) {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-      const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
-      generatedImageUrl = await uploadBase64ImageToStorage(
-        analyticsData.generatedImage,
-        `${sessionPrefix}_generated.jpg`
-      )
-    }
-
     const result = await insertUserAnalytics({
       sessionId: analyticsData.sessionId,
-      frontFacePhoto: frontFacePhotoUrl || undefined,
-      sideFacePhoto: sideFacePhotoUrl || undefined,
-      fullBodyPhoto: fullBodyPhotoUrl || undefined,
+      frontFacePhoto: analyticsData.frontFacePhoto,
+      sideFacePhoto: analyticsData.sideFacePhoto,
+      fullBodyPhoto: analyticsData.fullBodyPhoto,
       promptText: analyticsData.promptText,
-      generatedImage: generatedImageUrl || undefined,
+      generatedImage: analyticsData.generatedImage,
       success: analyticsData.success,
       errorMessage: analyticsData.errorMessage,
       processingTime: analyticsData.processingTime
