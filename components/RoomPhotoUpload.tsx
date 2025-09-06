@@ -3,10 +3,10 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Camera, Upload, X } from 'lucide-react'
-// import Image from 'next/image' // Unused import
+import Image from 'next/image'
 
 interface RoomPhotoUploadProps {
-  onImageSelect: (file: File) => void
+  onImageSelect: (file: File | null) => void
   currentImage: File | null
 }
 
@@ -85,7 +85,7 @@ export default function RoomPhotoUpload({ onImageSelect, currentImage }: RoomPho
 
   const removeImage = () => {
     setPreview(null)
-    onImageSelect(null as File)
+    onImageSelect(null)
   }
 
   return (
@@ -152,10 +152,12 @@ export default function RoomPhotoUpload({ onImageSelect, currentImage }: RoomPho
       {preview && (
         <div className="space-y-4">
           <div className="relative">
-            <img
+            <Image
               src={preview}
               alt="Room preview"
               className="w-full rounded-lg"
+              width={400}
+              height={300}
             />
             <button
               onClick={removeImage}

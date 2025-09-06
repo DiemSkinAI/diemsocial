@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Download, Loader2, ChevronLeft, ChevronRight, X, ToggleLeft, ToggleRight } from 'lucide-react'
 import BeforeAfterSlider from './BeforeAfterSlider'
+import Image from 'next/image'
 
 interface ResultsGalleryProps {
   images: Array<{ url: string }>
@@ -20,7 +21,7 @@ export default function ResultsGallery({ images, originalImage, isLoading, onRes
   // Calculate aspect ratio from original image
   useEffect(() => {
     if (originalImage) {
-      const img = new Image()
+      const img = new globalThis.Image()
       img.onload = () => {
         setImageAspectRatio(img.width / img.height)
       }
@@ -129,11 +130,13 @@ export default function ResultsGallery({ images, originalImage, isLoading, onRes
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">AI Generated Result</h3>
           <div className="relative rounded-lg overflow-hidden bg-gray-100">
-            <img
+            <Image
               src={images[selectedImage].url}
               alt={`AI Generated Visualization ${selectedImage + 1}`}
               className="w-full h-auto cursor-pointer"
               onClick={() => setIsFullscreen(true)}
+              width={800}
+              height={600}
             />
             {images.length > 1 && (
               <>
@@ -177,10 +180,12 @@ export default function ResultsGallery({ images, originalImage, isLoading, onRes
                   : 'hover:scale-105 opacity-70 hover:opacity-100'
               }`}
             >
-              <img
+              <Image
                 src={image.url}
                 alt={`Thumbnail ${index + 1}`}
                 className="w-24 h-24 object-cover"
+                width={96}
+                height={96}
               />
             </button>
           ))}
@@ -219,10 +224,12 @@ export default function ResultsGallery({ images, originalImage, isLoading, onRes
           >
             <X className="h-6 w-6 text-white" />
           </button>
-          <img
+          <Image
             src={images[selectedImage].url}
             alt={`Fullscreen visualization ${selectedImage + 1}`}
             className="max-w-full max-h-full object-contain"
+            width={1200}
+            height={800}
           />
         </div>
       )}

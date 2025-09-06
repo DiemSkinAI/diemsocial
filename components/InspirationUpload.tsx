@@ -3,6 +3,7 @@
 import React, { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { X, Sparkles } from 'lucide-react'
+import Image from 'next/image'
 
 interface InspirationUploadProps {
   onImageSelect: (file: File | null) => void
@@ -65,10 +66,12 @@ export default function InspirationUpload({ onImageSelect, currentImage }: Inspi
         </div>
       ) : (
         <div className="relative">
-          <img
+          <Image
             src={preview}
             alt="Inspiration preview"
             className="w-full rounded-lg"
+            width={400}
+            height={300}
           />
           <button
             onClick={removeImage}

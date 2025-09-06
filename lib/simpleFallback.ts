@@ -30,8 +30,7 @@ export async function processImageWithFallback(
     const result = await sharp(roomImageBuffer)
       .composite([{
         input: resizedMaterial,
-        blend: 'overlay',
-        opacity: 0.7
+        blend: 'overlay'
       }])
       .jpeg({ quality: 90 })
       .toBuffer();

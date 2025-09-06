@@ -1,10 +1,12 @@
-import { CountertopSegmenter } from './cv/segmentation';
+// import { CountertopSegmenter } from './cv/segmentation';
 // import type { SegmentationResult } from './cv/segmentation'; // Unused type
-import { TextureProcessor } from './cv/textureProcessing';
+// import { TextureProcessor } from './cv/textureProcessing';
 // import type { ProcessedTexture } from './cv/textureProcessing'; // Unused type
-import { GeometryMapper } from './cv/geometryMapping';
+// import { GeometryMapper } from './cv/geometryMapping';
 // import type { PerspectiveResult } from './cv/geometryMapping'; // Unused type
-import { RelightingEngine, LightingComponents, RelightingResult } from './cv/relighting';
+// import { RelightingEngine, LightingComponents, RelightingResult } from './cv/relighting';
+
+// Commenting out CV imports since they're not being used in the current implementation
 
 export interface TextureReplacementOptions {
   featherRadius?: number; // Edge blending radius
@@ -31,7 +33,8 @@ export interface TextureReplacementResult {
   };
 }
 
-export class TextureReplacementEngine {
+// Commented out since not being used - using simpleFallback.ts instead
+/*export class TextureReplacementEngine {
   private segmenter: CountertopSegmenter;
   private textureProcessor: TextureProcessor;
   private geometryMapper: GeometryMapper;
@@ -300,4 +303,4 @@ export class TextureReplacementEngine {
       // Implementation would configure higher quality settings across all components
     }
   }
-}
+}*/

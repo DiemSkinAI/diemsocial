@@ -255,8 +255,12 @@ Generate the requested image now.`
   } catch (error: unknown) {
     const errorTime = Date.now() - startTime
     console.error(`[${new Date().toISOString()}] Error after ${errorTime}ms:`, error)
-    console.error('Error details:', error.message)
-    console.error('Error stack:', error.stack)
+    
+    if (error instanceof Error) {
+      console.error('Error details:', error.message)
+      console.error('Error stack:', error.stack)
+    }
+    
     console.error('Full error object:', JSON.stringify(error, null, 2))
     
     // Ensure we always return JSON, never HTML

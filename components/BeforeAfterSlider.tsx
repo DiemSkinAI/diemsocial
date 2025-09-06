@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useCallback, useEffect } from 'react'
+import Image from 'next/image'
 
 interface BeforeAfterSliderProps {
   beforeImage: string
@@ -16,7 +17,7 @@ export default function BeforeAfterSlider({ beforeImage, afterImage, className =
 
   // Calculate aspect ratio from the first image
   useEffect(() => {
-    const img = new Image()
+    const img = new globalThis.Image()
     img.onload = () => {
       setImageAspectRatio(img.height / img.width)
     }
@@ -75,12 +76,13 @@ export default function BeforeAfterSlider({ beforeImage, afterImage, className =
       onTouchEnd={handleTouchEnd}
     >
       {/* Before Image (Right side) */}
-      <div className="w-full h-full">
-        <img
+      <div className="relative w-full h-full">
+        <Image
           src={beforeImage}
           alt="Before"
           className="w-full h-full object-cover"
           draggable={false}
+          fill
         />
       </div>
 
@@ -89,12 +91,15 @@ export default function BeforeAfterSlider({ beforeImage, afterImage, className =
         className="absolute top-0 left-0 w-full h-full overflow-hidden"
         style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
       >
-        <img
-          src={afterImage}
-          alt="After"
-          className="w-full h-full object-cover"
-          draggable={false}
-        />
+        <div className="relative w-full h-full">
+          <Image
+            src={afterImage}
+            alt="After"
+            className="w-full h-full object-cover"
+            draggable={false}
+            fill
+          />
+        </div>
       </div>
 
       {/* Slider Handle */}
