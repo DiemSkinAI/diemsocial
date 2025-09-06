@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Camera, ArrowUp, Sparkles, Download, Menu, X } from 'lucide-react'
-import { compressImage, fileToBase64 } from '@/lib/imageUtils'
+import { fileToBase64 } from '@/lib/imageUtils'
 import CameraCapture from '@/components/CameraCapture'
 import Image from 'next/image'
 
@@ -119,17 +119,14 @@ export default function Home() {
     try {
       const formData = new FormData()
       
-      // Compress and encode all three photos
-      const compressedFront = await compressImage(frontFaceImage)
-      const frontBase64 = await fileToBase64(compressedFront)
+      // Encode all three photos at full size
+      const frontBase64 = await fileToBase64(frontFaceImage)
       formData.append('frontFaceImage', frontBase64)
       
-      const compressedSide = await compressImage(sideFaceImage)
-      const sideBase64 = await fileToBase64(compressedSide)
+      const sideBase64 = await fileToBase64(sideFaceImage)
       formData.append('sideFaceImage', sideBase64)
       
-      const compressedFull = await compressImage(fullBodyImage)
-      const fullBase64 = await fileToBase64(compressedFull)
+      const fullBase64 = await fileToBase64(fullBodyImage)
       formData.append('fullBodyImage', fullBase64)
       
       formData.append('description', prompt)
@@ -158,72 +155,17 @@ export default function Home() {
         try {
           console.log('Tracking successful generation for session:', sessionId)
           
-          // Create smaller versions by re-compressing the already compressed images
-          const createAnalyticsVersion = async (base64: string): Promise<string> => {
-            try {
-              // Create canvas to resize image
-              const img = document.createElement('img')
-              img.src = base64
-              
-              return new Promise((resolve) => {
-                img.onload = () => {
-                  const canvas = document.createElement('canvas')
-                  const ctx = canvas.getContext('2d')
-                  
-                  // Resize to smaller dimensions (max 300px)
-                  const maxSize = 300
-                  let { width, height } = img
-                  
-                  if (width > height) {
-                    if (width > maxSize) {
-                      height = (height * maxSize) / width
-                      width = maxSize
-                    }
-                  } else {
-                    if (height > maxSize) {
-                      width = (width * maxSize) / height
-                      height = maxSize
-                    }
-                  }
-                  
-                  canvas.width = width
-                  canvas.height = height
-                  
-                  // Draw and compress
-                  ctx?.drawImage(img, 0, 0, width, height)
-                  const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6)
-                  resolve(compressedBase64)
-                }
-                
-                img.onerror = () => {
-                  console.error('Failed to load image for analytics compression')
-                  resolve('failed_to_compress')
-                }
-              })
-            } catch (error) {
-              console.error('Analytics compression error:', error)
-              return 'failed_to_compress'
-            }
-          }
-          
-          // Compress all images for analytics
-          const [compressedFront, compressedSide, compressedFull, compressedGenerated] = await Promise.all([
-            createAnalyticsVersion(frontBase64),
-            createAnalyticsVersion(sideBase64), 
-            createAnalyticsVersion(fullBase64),
-            createAnalyticsVersion(data.images?.[0]?.url || '')
-          ])
           
           const analyticsResponse = await fetch('/api/track-analytics', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId,
-              frontFacePhoto: compressedFront,
-              sideFacePhoto: compressedSide,
-              fullBodyPhoto: compressedFull,
+              frontFacePhoto: frontBase64,
+              sideFacePhoto: sideBase64,
+              fullBodyPhoto: fullBase64,
               promptText: prompt,
-              generatedImage: compressedGenerated,
+              generatedImage: data.images?.[0]?.url || '',
               success: true,
               processingTime
             })
@@ -259,9 +201,9 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId,
-              frontFacePhoto: 'uploaded_but_failed',
-              sideFacePhoto: 'uploaded_but_failed', 
-              fullBodyPhoto: 'uploaded_but_failed',
+              frontFacePhoto: frontBase64,
+              sideFacePhoto: sideBase64,
+              fullBodyPhoto: fullBase64,
               promptText: prompt,
               success: false,
               errorMessage,

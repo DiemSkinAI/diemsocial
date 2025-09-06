@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { insertUserAnalytics } from '@/lib/database'
+import { uploadBase64ImageToStorage } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,13 +14,50 @@ export async function POST(request: NextRequest) {
       processingTime: analyticsData.processingTime
     })
 
+    // Upload images to Supabase storage and get URLs
+    let frontFacePhotoUrl = null
+    let sideFacePhotoUrl = null
+    let fullBodyPhotoUrl = null
+    let generatedImageUrl = null
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
+
+    if (analyticsData.frontFacePhoto) {
+      frontFacePhotoUrl = await uploadBase64ImageToStorage(
+        analyticsData.frontFacePhoto,
+        `${sessionPrefix}_front_face.jpg`
+      )
+    }
+
+    if (analyticsData.sideFacePhoto) {
+      sideFacePhotoUrl = await uploadBase64ImageToStorage(
+        analyticsData.sideFacePhoto,
+        `${sessionPrefix}_side_face.jpg`
+      )
+    }
+
+    if (analyticsData.fullBodyPhoto) {
+      fullBodyPhotoUrl = await uploadBase64ImageToStorage(
+        analyticsData.fullBodyPhoto,
+        `${sessionPrefix}_full_body.jpg`
+      )
+    }
+
+    if (analyticsData.generatedImage) {
+      generatedImageUrl = await uploadBase64ImageToStorage(
+        analyticsData.generatedImage,
+        `${sessionPrefix}_generated.jpg`
+      )
+    }
+
     const result = await insertUserAnalytics({
       sessionId: analyticsData.sessionId,
-      frontFacePhoto: analyticsData.frontFacePhoto,
-      sideFacePhoto: analyticsData.sideFacePhoto,
-      fullBodyPhoto: analyticsData.fullBodyPhoto,
+      frontFacePhoto: frontFacePhotoUrl,
+      sideFacePhoto: sideFacePhotoUrl,
+      fullBodyPhoto: fullBodyPhotoUrl,
       promptText: analyticsData.promptText,
-      generatedImage: analyticsData.generatedImage,
+      generatedImage: generatedImageUrl,
       success: analyticsData.success,
       errorMessage: analyticsData.errorMessage,
       processingTime: analyticsData.processingTime
