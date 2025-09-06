@@ -166,15 +166,13 @@ export default function Home() {
                 return base64
               }
               
-              // Extract the base64 data part
-              const base64Data = base64.split(',')[1] || base64
-              
               // Create a blob from base64
               const blob = await fetch(base64).then(r => r.blob())
               
               // If it's an image, compress it
               if (blob.type.startsWith('image/')) {
-                const compressed = await compressImage(new File([blob], 'analytics.jpg', { type: blob.type }), 0.3)
+                const file = new File([blob], 'analytics.jpg', { type: blob.type })
+                const compressed = await compressImage(file)
                 const reader = new FileReader()
                 return new Promise((resolve) => {
                   reader.onloadend = () => resolve(reader.result as string)
