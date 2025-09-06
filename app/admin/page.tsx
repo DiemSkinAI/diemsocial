@@ -132,6 +132,7 @@ export default function AdminDashboard() {
                       {selectedEntry.front_face_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Front Face</p>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={selectedEntry.front_face_photo}
                             alt="Front Face"
@@ -142,6 +143,7 @@ export default function AdminDashboard() {
                       {selectedEntry.side_face_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Side Face</p>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={selectedEntry.side_face_photo}
                             alt="Side Face"
@@ -152,6 +154,7 @@ export default function AdminDashboard() {
                       {selectedEntry.full_body_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Full Body</p>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={selectedEntry.full_body_photo}
                             alt="Full Body"

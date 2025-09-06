@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
     console.error('Analytics tracking failed:', error)
     console.error('Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
-      code: (error as any)?.code,
-      detail: (error as any)?.detail
+      code: (error as { code?: string })?.code,
+      detail: (error as { detail?: string })?.detail
     })
     return NextResponse.json({ 
       success: false, 
