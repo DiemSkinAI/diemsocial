@@ -158,43 +158,60 @@ export default function Home() {
         try {
           console.log('Tracking successful generation for session:', sessionId)
           
-          // Compress images to smaller size to avoid 413 error but still viewable
-          const compressForAnalytics = async (base64: string, maxKB = 50): Promise<string> => {
+          // Create smaller versions by re-compressing the already compressed images
+          const createAnalyticsVersion = async (base64: string): Promise<string> => {
             try {
-              // If already small enough, return as is
-              if (base64.length < maxKB * 1024) {
-                return base64
-              }
+              // Create canvas to resize image
+              const img = new Image()
+              img.src = base64
               
-              // Create a blob from base64
-              const blob = await fetch(base64).then(r => r.blob())
-              
-              // If it's an image, compress it
-              if (blob.type.startsWith('image/')) {
-                const file = new File([blob], 'analytics.jpg', { type: blob.type })
-                const compressed = await compressImage(file)
-                const reader = new FileReader()
-                return new Promise((resolve) => {
-                  reader.onloadend = () => resolve(reader.result as string)
-                  reader.readAsDataURL(compressed)
-                })
-              }
-              
-              // For non-images or if compression fails, truncate
-              return base64.substring(0, maxKB * 1024) + '...[truncated]'
+              return new Promise((resolve) => {
+                img.onload = () => {
+                  const canvas = document.createElement('canvas')
+                  const ctx = canvas.getContext('2d')
+                  
+                  // Resize to smaller dimensions (max 300px)
+                  const maxSize = 300
+                  let { width, height } = img
+                  
+                  if (width > height) {
+                    if (width > maxSize) {
+                      height = (height * maxSize) / width
+                      width = maxSize
+                    }
+                  } else {
+                    if (height > maxSize) {
+                      width = (width * maxSize) / height
+                      height = maxSize
+                    }
+                  }
+                  
+                  canvas.width = width
+                  canvas.height = height
+                  
+                  // Draw and compress
+                  ctx?.drawImage(img, 0, 0, width, height)
+                  const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6)
+                  resolve(compressedBase64)
+                }
+                
+                img.onerror = () => {
+                  console.error('Failed to load image for analytics compression')
+                  resolve('failed_to_compress')
+                }
+              })
             } catch (error) {
               console.error('Analytics compression error:', error)
-              // Fallback to simple truncation
-              return base64.substring(0, maxKB * 1024) + '...[truncated]'
+              return 'failed_to_compress'
             }
           }
           
           // Compress all images for analytics
           const [compressedFront, compressedSide, compressedFull, compressedGenerated] = await Promise.all([
-            compressForAnalytics(frontBase64, 100), // 100KB for user photos
-            compressForAnalytics(sideBase64, 100),
-            compressForAnalytics(fullBase64, 100),
-            compressForAnalytics(data.images?.[0]?.url || '', 200) // 200KB for generated
+            createAnalyticsVersion(frontBase64),
+            createAnalyticsVersion(sideBase64), 
+            createAnalyticsVersion(fullBase64),
+            createAnalyticsVersion(data.images?.[0]?.url || '')
           ])
           
           const analyticsResponse = await fetch('/api/track-analytics', {

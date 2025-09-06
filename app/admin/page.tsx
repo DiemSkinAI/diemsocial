@@ -131,7 +131,7 @@ export default function AdminDashboard() {
                       {selectedEntry.front_face_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Front Face</p>
-                          {selectedEntry.front_face_photo.includes('[truncated]') ? (
+                          {selectedEntry.front_face_photo.includes('[truncated]') || selectedEntry.front_face_photo === 'failed_to_compress' ? (
                             <div className="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
                               No preview
                             </div>
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
                       {selectedEntry.side_face_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Side Face</p>
-                          {selectedEntry.side_face_photo.includes('[truncated]') ? (
+                          {selectedEntry.side_face_photo.includes('[truncated]') || selectedEntry.side_face_photo === 'failed_to_compress' ? (
                             <div className="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
                               No preview
                             </div>
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
                       {selectedEntry.full_body_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Full Body</p>
-                          {selectedEntry.full_body_photo.includes('[truncated]') ? (
+                          {selectedEntry.full_body_photo.includes('[truncated]') || selectedEntry.full_body_photo === 'failed_to_compress' ? (
                             <div className="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
                               No preview
                             </div>
@@ -212,7 +212,7 @@ export default function AdminDashboard() {
                   {selectedEntry.generated_image && (
                     <div className="mb-6">
                       <h3 className="font-medium mb-2">Generated Result</h3>
-                      {selectedEntry.generated_image.includes('[truncated]') ? (
+                      {selectedEntry.generated_image.includes('[truncated]') || selectedEntry.generated_image === 'failed_to_compress' ? (
                         <div className="w-full max-w-md h-64 bg-gray-200 rounded flex items-center justify-center text-gray-500">
                           No preview available
                         </div>
