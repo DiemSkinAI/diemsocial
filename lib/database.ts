@@ -5,15 +5,36 @@ let pool: Pool | null = null
 export function getPool() {
   if (!pool) {
     if (!process.env.DATABASE_URL) {
+      console.error('Database connection failed: DATABASE_URL environment variable is not set')
       throw new Error('DATABASE_URL environment variable is not set')
     }
 
-    pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? {
-        rejectUnauthorized: false
-      } : false
-    })
+    console.log('Creating database connection pool...')
+    console.log('Environment:', process.env.NODE_ENV)
+    console.log('Database URL format:', process.env.DATABASE_URL.substring(0, 20) + '...')
+    
+    try {
+      pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? {
+          rejectUnauthorized: false
+        } : false,
+        // Add connection timeout and retry settings
+        connectionTimeoutMillis: 30000,
+        idleTimeoutMillis: 30000,
+        max: 20
+      })
+      
+      // Test the connection immediately
+      pool.on('error', (err) => {
+        console.error('Database pool error:', err)
+      })
+      
+      console.log('Database connection pool created successfully')
+    } catch (error) {
+      console.error('Failed to create database connection pool:', error)
+      throw error
+    }
   }
   
   return pool

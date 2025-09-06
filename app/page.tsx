@@ -171,10 +171,21 @@ export default function Home() {
               processingTime
             })
           })
-          const analyticsResult = await analyticsResponse.json()
-          console.log('Analytics tracking result:', analyticsResult)
+          
+          if (!analyticsResponse.ok) {
+            console.error('Analytics API returned error status:', analyticsResponse.status)
+            const errorData = await analyticsResponse.json()
+            console.error('Analytics API error details:', errorData)
+            // Show visible error to user temporarily for debugging
+            setError(`Analytics tracking failed: ${errorData.error || 'Unknown error'}`)
+          } else {
+            const analyticsResult = await analyticsResponse.json()
+            console.log('Analytics tracking successful:', analyticsResult)
+          }
         } catch (error) {
-          console.error('Analytics tracking error:', error)
+          console.error('Analytics tracking network error:', error)
+          // Show visible error to user temporarily for debugging
+          setError(`Analytics network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
         }
       }
     } catch (error) {
@@ -185,7 +196,8 @@ export default function Home() {
       // Track failed generation (production only)
       if (window.location.hostname !== 'localhost') {
         try {
-          await fetch('/api/track-analytics', {
+          console.log('Tracking failed generation for session:', sessionId)
+          const analyticsResponse = await fetch('/api/track-analytics', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -199,8 +211,17 @@ export default function Home() {
               processingTime
             })
           })
-        } catch {
-          console.log('Analytics tracking disabled (database not connected)')
+          
+          if (!analyticsResponse.ok) {
+            console.error('Analytics API error for failed generation:', analyticsResponse.status)
+            const errorData = await analyticsResponse.json()
+            console.error('Analytics API error details:', errorData)
+          } else {
+            const analyticsResult = await analyticsResponse.json()
+            console.log('Failed generation analytics tracking successful:', analyticsResult)
+          }
+        } catch (analyticsError) {
+          console.error('Analytics tracking error for failed generation:', analyticsError)
         }
       }
     } finally {
