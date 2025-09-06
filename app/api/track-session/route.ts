@@ -3,11 +3,10 @@ import { insertUserSession } from '@/lib/database'
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, userAgent, timestamp } = await request.json()
+    const { sessionId, userAgent } = await request.json()
     
     // Get IP address
-    const ip = request.ip || 
-              request.headers.get('x-forwarded-for')?.split(',')[0] || 
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
               request.headers.get('x-real-ip') || 
               'unknown'
 

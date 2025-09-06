@@ -38,7 +38,7 @@ export default function Home() {
             timestamp: new Date().toISOString()
           })
         })
-      } catch (error) {
+      } catch {
         console.log('Session tracking disabled (database not connected)')
       }
     }
@@ -161,7 +161,7 @@ export default function Home() {
               processingTime
             })
           })
-        } catch (analyticsError) {
+        } catch {
           console.log('Analytics tracking disabled (database not connected)')
         }
       }
@@ -187,7 +187,7 @@ export default function Home() {
               processingTime
             })
           })
-        } catch (analyticsError) {
+        } catch {
           console.log('Analytics tracking disabled (database not connected)')
         }
       }
