@@ -132,34 +132,70 @@ export default function AdminDashboard() {
                       {selectedEntry.front_face_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Front Face</p>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={selectedEntry.front_face_photo}
-                            alt="Front Face"
-                            className="w-full h-24 object-cover rounded"
-                          />
+                          {selectedEntry.front_face_photo.includes('[truncated]') ? (
+                            <div className="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                              No preview
+                            </div>
+                          ) : (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={selectedEntry.front_face_photo}
+                              alt="Front Face"
+                              className="w-full h-24 object-cover rounded"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement
+                                target.style.display = 'none'
+                                target.parentElement?.insertAdjacentHTML('beforeend', 
+                                  '<div class="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">Invalid image</div>')
+                              }}
+                            />
+                          )}
                         </div>
                       )}
                       {selectedEntry.side_face_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Side Face</p>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={selectedEntry.side_face_photo}
-                            alt="Side Face"
-                            className="w-full h-24 object-cover rounded"
-                          />
+                          {selectedEntry.side_face_photo.includes('[truncated]') ? (
+                            <div className="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                              No preview
+                            </div>
+                          ) : (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={selectedEntry.side_face_photo}
+                              alt="Side Face"
+                              className="w-full h-24 object-cover rounded"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement
+                                target.style.display = 'none'
+                                target.parentElement?.insertAdjacentHTML('beforeend', 
+                                  '<div class="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">Invalid image</div>')
+                              }}
+                            />
+                          )}
                         </div>
                       )}
                       {selectedEntry.full_body_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Full Body</p>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={selectedEntry.full_body_photo}
-                            alt="Full Body"
-                            className="w-full h-24 object-cover rounded"
-                          />
+                          {selectedEntry.full_body_photo.includes('[truncated]') ? (
+                            <div className="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                              No preview
+                            </div>
+                          ) : (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={selectedEntry.full_body_photo}
+                              alt="Full Body"
+                              className="w-full h-24 object-cover rounded"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement
+                                target.style.display = 'none'
+                                target.parentElement?.insertAdjacentHTML('beforeend', 
+                                  '<div class="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">Invalid image</div>')
+                              }}
+                            />
+                          )}
                         </div>
                       )}
                     </div>
@@ -177,13 +213,24 @@ export default function AdminDashboard() {
                   {selectedEntry.generated_image && (
                     <div className="mb-6">
                       <h3 className="font-medium mb-2">Generated Result</h3>
-                      <Image
-                        src={selectedEntry.generated_image}
-                        alt="Generated"
-                        className="w-full max-w-md rounded"
-                        width={400}
-                        height={400}
-                      />
+                      {selectedEntry.generated_image.includes('[truncated]') ? (
+                        <div className="w-full max-w-md h-64 bg-gray-200 rounded flex items-center justify-center text-gray-500">
+                          No preview available
+                        </div>
+                      ) : (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={selectedEntry.generated_image}
+                          alt="Generated"
+                          className="w-full max-w-md rounded"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.style.display = 'none'
+                            target.parentElement?.insertAdjacentHTML('beforeend', 
+                              '<div class="w-full max-w-md h-64 bg-gray-200 rounded flex items-center justify-center text-gray-500">Invalid image</div>')
+                          }}
+                        />
+                      )}
                     </div>
                   )}
 

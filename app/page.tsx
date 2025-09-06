@@ -158,34 +158,59 @@ export default function Home() {
         try {
           console.log('Tracking successful generation for session:', sessionId)
           
-          // Create smaller thumbnail versions to avoid 413 Content Too Large error
-          const createThumbnail = (base64: string, maxSize = 100): string => {
+          // Compress images to smaller size to avoid 413 error but still viewable
+          const compressForAnalytics = async (base64: string, maxKB = 50): Promise<string> => {
             try {
-              return base64.substring(0, maxSize) + '...[truncated]'
-            } catch {
-              return 'thumbnail_creation_failed'
+              // If already small enough, return as is
+              if (base64.length < maxKB * 1024) {
+                return base64
+              }
+              
+              // Extract the base64 data part
+              const base64Data = base64.split(',')[1] || base64
+              
+              // Create a blob from base64
+              const blob = await fetch(base64).then(r => r.blob())
+              
+              // If it's an image, compress it
+              if (blob.type.startsWith('image/')) {
+                const compressed = await compressImage(new File([blob], 'analytics.jpg', { type: blob.type }), 0.3)
+                const reader = new FileReader()
+                return new Promise((resolve) => {
+                  reader.onloadend = () => resolve(reader.result as string)
+                  reader.readAsDataURL(compressed)
+                })
+              }
+              
+              // For non-images or if compression fails, truncate
+              return base64.substring(0, maxKB * 1024) + '...[truncated]'
+            } catch (error) {
+              console.error('Analytics compression error:', error)
+              // Fallback to simple truncation
+              return base64.substring(0, maxKB * 1024) + '...[truncated]'
             }
           }
+          
+          // Compress all images for analytics
+          const [compressedFront, compressedSide, compressedFull, compressedGenerated] = await Promise.all([
+            compressForAnalytics(frontBase64, 100), // 100KB for user photos
+            compressForAnalytics(sideBase64, 100),
+            compressForAnalytics(fullBase64, 100),
+            compressForAnalytics(data.images?.[0]?.url || '', 200) // 200KB for generated
+          ])
           
           const analyticsResponse = await fetch('/api/track-analytics', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId,
-              frontFacePhoto: createThumbnail(frontBase64),
-              sideFacePhoto: createThumbnail(sideBase64),
-              fullBodyPhoto: createThumbnail(fullBase64),
+              frontFacePhoto: compressedFront,
+              sideFacePhoto: compressedSide,
+              fullBodyPhoto: compressedFull,
               promptText: prompt,
-              generatedImage: createThumbnail(data.images?.[0]?.url || ''),
+              generatedImage: compressedGenerated,
               success: true,
-              processingTime,
-              // Store metadata instead of full images
-              metadata: {
-                frontSize: frontBase64.length,
-                sideSize: sideBase64.length,
-                fullSize: fullBase64.length,
-                generatedSize: data.images?.[0]?.url?.length || 0
-              }
+              processingTime
             })
           })
           
