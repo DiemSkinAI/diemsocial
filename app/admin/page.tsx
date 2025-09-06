@@ -132,36 +132,30 @@ export default function AdminDashboard() {
                       {selectedEntry.front_face_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Front Face</p>
-                          <Image
+                          <img
                             src={selectedEntry.front_face_photo}
                             alt="Front Face"
                             className="w-full h-24 object-cover rounded"
-                            width={100}
-                            height={100}
                           />
                         </div>
                       )}
                       {selectedEntry.side_face_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Side Face</p>
-                          <Image
+                          <img
                             src={selectedEntry.side_face_photo}
                             alt="Side Face"
                             className="w-full h-24 object-cover rounded"
-                            width={100}
-                            height={100}
                           />
                         </div>
                       )}
                       {selectedEntry.full_body_photo && (
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Full Body</p>
-                          <Image
+                          <img
                             src={selectedEntry.full_body_photo}
                             alt="Full Body"
                             className="w-full h-24 object-cover rounded"
-                            width={100}
-                            height={100}
                           />
                         </div>
                       )}
