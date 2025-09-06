@@ -95,23 +95,9 @@ export async function POST(request: NextRequest) {
     const parts: Array<{inlineData: {data: string; mimeType: string}} | {text: string}> = [frontFaceFile, sideFaceFile, fullBodyFile]
 
     // Single prompt template for initial generation
-    const promptText = `You are an expert AI photo generator specializing in creating stunning social media content. You have been provided with three reference photos of a person:
+    const promptText = `Use the three uploaded reference photos (front, 45-degree side, and full body) to create a photo of the person. Make the generated person look exactly like the real individual in the photos: same face, body shape, hairstyle, skin tone. Preserve their natural features with high accuracy so the result is instantly recognizable. The output should look like a high-quality, realistic photograph suitable for social media use. Do not exaggerate, stylize, or alter their identity—focus on photorealism and faithful representation.
 
-IMAGE 1: Front face photo - showing their facial features from the front
-IMAGE 2: Side face photo - showing their profile  
-IMAGE 3: Full body photo - showing their body proportions and stance
-
-Your task is to generate a new photo of this exact same person based on the following request: "${description}"
-
-CRITICAL REQUIREMENTS:
-- Maintain the exact facial features, skin tone, and body proportions from the reference photos
-- The person must be clearly recognizable as the same individual from the reference photos
-- Generate a high-quality, photorealistic image suitable for social media
-- Follow the outfit, location, and mood specified in the description
-- Ensure natural lighting and professional composition
-- The final image should look like a real photograph, not artificial or edited
-
-Generate the requested image now.`
+Generate a new photo of this exact same person based on the following request: "${description}"`
     
     // Add text prompt to parts
     parts.push({ text: promptText })
@@ -128,7 +114,7 @@ Generate the requested image now.`
     const model = genAI.getGenerativeModel({
       model: modelName,
       generationConfig: {
-        temperature: 0.1
+        temperature: 0.15
       }
     })
 

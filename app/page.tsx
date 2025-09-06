@@ -20,6 +20,7 @@ export default function Home() {
   const [isTyping, setIsTyping] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const triggerBorderAnimation = () => {
     setShowBorderAnimation(true)
@@ -34,6 +35,15 @@ export default function Home() {
     
     return () => clearTimeout(timer)
   }, [])
+
+  // Auto-resize textarea when prompt changes
+  useEffect(() => {
+    if (textareaRef.current) {
+      const textarea = textareaRef.current
+      textarea.style.height = 'auto'
+      textarea.style.height = Math.max(textarea.scrollHeight, 100) + 'px'
+    }
+  }, [prompt])
 
   const handleTyping = useCallback(() => {
     setIsTyping(true)
@@ -52,6 +62,11 @@ export default function Home() {
   const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(e.target.value)
     handleTyping()
+    
+    // Auto-resize textarea
+    const target = e.target as HTMLTextAreaElement
+    target.style.height = 'auto'
+    target.style.height = Math.max(target.scrollHeight, 100) + 'px'
   }, [handleTyping])
 
   const handleSubmit = async () => {
@@ -229,14 +244,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Simple Message Interface */}
-          <div className="mt-8">
-            <div className="backdrop-blur-sm rounded-3xl border border-gray-700/30 p-4" style={{ backgroundColor: '#1D1E26' }}>
-              <p className="text-gray-400 text-center">
-                Want another look with the same photos? Click &quot;Try Another&quot; • Want to use different photos? Click &quot;New Photos&quot;
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     )
@@ -436,13 +443,14 @@ export default function Home() {
               {/* Text Input */}
               <div className="flex items-center gap-4">
                 <textarea
+                  ref={textareaRef}
                   value={prompt}
                   onChange={handleTextChange}
                   onFocus={triggerBorderAnimation}
                   placeholder="Upload 3 photos of yourself and describe the scene you want to create..."
                   className="flex-1 bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none text-base md:text-lg py-3 md:py-1 overflow-hidden"
-                  rows={3}
-                  style={{ minHeight: '100px' }}
+                  rows={1}
+                  style={{ minHeight: '100px', height: 'auto' }}
                 />
                 
                 {/* Action Buttons */}
