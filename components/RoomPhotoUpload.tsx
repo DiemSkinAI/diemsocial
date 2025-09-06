@@ -158,6 +158,7 @@ export default function RoomPhotoUpload({ onImageSelect, currentImage }: RoomPho
               className="w-full rounded-lg"
               width={400}
               height={300}
+              style={{width: 'auto', height: 'auto'}}
             />
             <button
               onClick={removeImage}

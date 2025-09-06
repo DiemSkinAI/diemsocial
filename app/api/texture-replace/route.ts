@@ -131,7 +131,7 @@ function dataURLToBuffer(dataURL: string): Buffer {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function validateImageBuffer(buffer: Buffer, name: string): Promise<void> {
   try {
-    const Jimp = await import('jimp');
+    const { Jimp } = await import('jimp');
     const image = await Jimp.read(buffer);
     
     const { width, height } = image.bitmap;

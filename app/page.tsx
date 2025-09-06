@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Camera, ArrowUp, Sparkles, Download, Menu, X } from 'lucide-react'
 import { compressImage, fileToBase64 } from '@/lib/imageUtils'
 import CameraCapture from '@/components/CameraCapture'
@@ -35,7 +35,7 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [])
 
-  const handleTyping = () => {
+  const handleTyping = useCallback(() => {
     setIsTyping(true)
     
     // Clear existing timeout
@@ -47,7 +47,12 @@ export default function Home() {
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false)
     }, 1000)
-  }
+  }, [])
+
+  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(e.target.value)
+    handleTyping()
+  }, [handleTyping])
 
   const handleSubmit = async () => {
     if (!frontFaceImage || !sideFaceImage || !fullBodyImage) {
@@ -212,7 +217,7 @@ export default function Home() {
           </div>
           
           <div className="relative">
-            <Image src={results[0].url} alt="Generated" className="w-full rounded-lg" width={800} height={600} />
+            <Image src={results[0].url} alt="Generated" className="w-full rounded-lg" width={800} height={600} style={{width: 'auto', height: 'auto'}} />
             
             {/* Download button overlay */}
             <button
@@ -314,6 +319,11 @@ export default function Home() {
               className="mx-auto max-w-48 md:max-w-xs opacity-90"
               width={300}
               height={200}
+              priority
+              style={{
+                width: 'auto',
+                height: 'auto'
+              }}
             />
           </div>
           <p className="text-xl font-semibold" style={{ color: '#7F8188' }}>
@@ -335,11 +345,13 @@ export default function Home() {
                     onChange={handleFrontFaceUpload}
                     className="hidden"
                   />
-                  <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-blue-500 transition-all text-center" style={{ backgroundColor: '#1D1E26' }}>
+                  <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-blue-500 transition-all text-center h-32 md:h-40 flex items-center justify-center" style={{ backgroundColor: '#1D1E26' }}>
                     {frontFaceImage ? (
-                      <Image src={URL.createObjectURL(frontFaceImage)} alt="Front Face" className="w-full h-20 md:h-28 object-cover rounded-lg" width={112} height={112} />
+                      <div className="w-full h-20 md:h-28 relative overflow-hidden rounded-lg">
+                        <Image src={URL.createObjectURL(frontFaceImage)} alt="Front Face" className="object-cover" fill />
+                      </div>
                     ) : (
-                      <div className="h-20 md:h-28 flex flex-col items-center justify-center">
+                      <div className="flex flex-col items-center justify-center">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-lg md:text-xl mb-1 md:mb-2">1</div>
                         <p className="text-xs text-gray-400">Front Face</p>
                       </div>
@@ -363,11 +375,13 @@ export default function Home() {
                     onChange={handleSideFaceUpload}
                     className="hidden"
                   />
-                  <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-purple-500 transition-all text-center" style={{ backgroundColor: '#1D1E26' }}>
+                  <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-purple-500 transition-all text-center h-32 md:h-40 flex items-center justify-center" style={{ backgroundColor: '#1D1E26' }}>
                     {sideFaceImage ? (
-                      <Image src={URL.createObjectURL(sideFaceImage)} alt="Side Face" className="w-full h-20 md:h-28 object-cover rounded-lg" width={112} height={112} />
+                      <div className="w-full h-20 md:h-28 relative overflow-hidden rounded-lg">
+                        <Image src={URL.createObjectURL(sideFaceImage)} alt="Side Face" className="object-cover" fill />
+                      </div>
                     ) : (
-                      <div className="h-20 md:h-28 flex flex-col items-center justify-center">
+                      <div className="flex flex-col items-center justify-center">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-lg md:text-xl mb-1 md:mb-2">2</div>
                         <p className="text-xs text-gray-400">Side Face</p>
                       </div>
@@ -391,11 +405,13 @@ export default function Home() {
                     onChange={handleFullBodyUpload}
                     className="hidden"
                   />
-                  <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-green-500 transition-all text-center" style={{ backgroundColor: '#1D1E26' }}>
+                  <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-green-500 transition-all text-center h-32 md:h-40 flex items-center justify-center" style={{ backgroundColor: '#1D1E26' }}>
                     {fullBodyImage ? (
-                      <Image src={URL.createObjectURL(fullBodyImage)} alt="Full Body" className="w-full h-20 md:h-28 object-cover rounded-lg" width={112} height={112} />
+                      <div className="w-full h-20 md:h-28 relative overflow-hidden rounded-lg">
+                        <Image src={URL.createObjectURL(fullBodyImage)} alt="Full Body" className="object-cover" fill />
+                      </div>
                     ) : (
-                      <div className="h-20 md:h-28 flex flex-col items-center justify-center">
+                      <div className="flex flex-col items-center justify-center">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-lg md:text-xl mb-1 md:mb-2">3</div>
                         <p className="text-xs text-gray-400">Full Body</p>
                       </div>
@@ -416,71 +432,17 @@ export default function Home() {
             {/* Input Container */}
             <div className={`relative backdrop-blur-sm rounded-3xl border border-gray-700/30 p-4 hover:border-gray-600/30 transition-all duration-300 animated-border ${showBorderAnimation ? 'active' : ''} ${isTyping ? 'typing-pulse' : ''}`} style={{ backgroundColor: '#1D1E26' }}>
               
-              {/* File Previews */}
-              {(frontFaceImage || sideFaceImage || fullBodyImage) && (
-                <div className="flex gap-2 mb-4 pb-4 border-b border-gray-700/50">
-                  {frontFaceImage && (
-                    <div className="relative">
-                      <Image 
-                        src={URL.createObjectURL(frontFaceImage)} 
-                        alt="Front Face" 
-                        className="w-16 h-16 object-cover rounded-lg"
-                        width={64}
-                        height={64}
-                      />
-                      <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] px-2 py-1 rounded-full">
-                        Front
-                      </div>
-                    </div>
-                  )}
-                  {sideFaceImage && (
-                    <div className="relative">
-                      <Image 
-                        src={URL.createObjectURL(sideFaceImage)} 
-                        alt="Side Face" 
-                        className="w-16 h-16 object-cover rounded-lg"
-                        width={64}
-                        height={64}
-                      />
-                      <div className="absolute -top-2 -right-2 bg-purple-600 text-white text-[10px] px-2 py-1 rounded-full">
-                        Side
-                      </div>
-                    </div>
-                  )}
-                  {fullBodyImage && (
-                    <div className="relative">
-                      <Image 
-                        src={URL.createObjectURL(fullBodyImage)} 
-                        alt="Full Body" 
-                        className="w-16 h-16 object-cover rounded-lg"
-                        width={64}
-                        height={64}
-                      />
-                      <div className="absolute -top-2 -right-2 bg-green-600 text-white text-[10px] px-2 py-1 rounded-full">
-                        Full
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* Text Input */}
               <div className="flex items-center gap-4">
                 <textarea
                   value={prompt}
-                  onChange={(e) => {
-                    setPrompt(e.target.value)
-                    handleTyping()
-                    // Auto-resize on content change
-                    const target = e.target as HTMLTextAreaElement
-                    target.style.height = 'auto'
-                    target.style.height = Math.max(target.scrollHeight, 100) + 'px'
-                  }}
+                  onChange={handleTextChange}
                   onFocus={triggerBorderAnimation}
                   placeholder="Upload 3 photos of yourself and describe the scene you want to create..."
                   className="flex-1 bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none text-base md:text-lg py-3 md:py-1 overflow-hidden"
-                  rows={1}
-                  style={{ height: 'auto', minHeight: '100px' }}
+                  rows={3}
+                  style={{ minHeight: '100px' }}
                 />
                 
                 {/* Action Buttons */}
@@ -557,6 +519,10 @@ export default function Home() {
             className="w-12 md:w-16 opacity-60 hover:opacity-80 transition-opacity"
             width={64}
             height={64}
+            style={{
+              width: 'auto',
+              height: 'auto'
+            }}
           />
         </div>
       </div>

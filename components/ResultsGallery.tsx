@@ -137,6 +137,7 @@ export default function ResultsGallery({ images, originalImage, isLoading, onRes
               onClick={() => setIsFullscreen(true)}
               width={800}
               height={600}
+              style={{width: 'auto', height: 'auto'}}
             />
             {images.length > 1 && (
               <>
@@ -186,6 +187,7 @@ export default function ResultsGallery({ images, originalImage, isLoading, onRes
                 className="w-24 h-24 object-cover"
                 width={96}
                 height={96}
+                style={{width: 'auto', height: 'auto'}}
               />
             </button>
           ))}
@@ -230,6 +232,7 @@ export default function ResultsGallery({ images, originalImage, isLoading, onRes
             className="max-w-full max-h-full object-contain"
             width={1200}
             height={800}
+            style={{width: 'auto', height: 'auto'}}
           />
         </div>
       )}
