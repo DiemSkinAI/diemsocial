@@ -13,23 +13,33 @@ export async function uploadImageToStorage(
   bucketName: string = 'analytics-images'
 ): Promise<string | null> {
   try {
-    const { data, error } = await supabaseAdmin.storage
-      .from(bucketName)
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: true
-      })
+    // Convert File/Blob to base64 for API upload
+    const base64Data = await new Promise<string>((resolve) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.readAsDataURL(file)
+    })
 
-    if (error) {
-      console.error('Error uploading file:', error)
+    // Use server-side upload API
+    const response = await fetch('/api/upload-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageData: base64Data,
+        fileName,
+        bucketName
+      })
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.error('Upload API error:', errorData)
       return null
     }
 
-    const { data: { publicUrl } } = supabaseAdmin.storage
-      .from(bucketName)
-      .getPublicUrl(data.path)
+    const { url } = await response.json()
+    return url
 
-    return publicUrl
   } catch (error) {
     console.error('Error uploading to Supabase:', error)
     return null
@@ -42,24 +52,28 @@ export async function uploadBase64ImageToStorage(
   bucketName: string = 'analytics-images'
 ): Promise<string | null> {
   try {
-    // Convert base64 to blob
-    const base64Response = await fetch(base64Data)
-    const blob = await base64Response.blob()
-    
-    // Determine file extension from blob type or base64 data
-    const mimeType = blob.type || base64Data.split(',')[0].split(':')[1].split(';')[0]
-    let extension = 'jpg'
-    
-    if (mimeType.includes('png')) extension = 'png'
-    else if (mimeType.includes('webp')) extension = 'webp'
-    else if (mimeType.includes('jpeg') || mimeType.includes('jpg')) extension = 'jpg'
-    
-    // Update filename with correct extension
-    const fileNameWithExtension = fileName.replace(/\.[^/.]+$/, '') + '.' + extension
-    
-    return await uploadImageToStorage(blob, fileNameWithExtension, bucketName)
+    // Use server-side upload API directly with base64 data
+    const response = await fetch('/api/upload-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageData: base64Data,
+        fileName,
+        bucketName
+      })
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.error('Upload API error:', errorData)
+      return null
+    }
+
+    const { url } = await response.json()
+    return url
+
   } catch (error) {
-    console.error('Error converting base64 to blob:', error)
+    console.error('Error uploading base64 to Supabase:', error)
     return null
   }
 }
