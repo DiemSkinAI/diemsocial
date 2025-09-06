@@ -19,8 +19,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    // Silently fail if database is not available
-    console.log('Analytics tracking failed:', error)
-    return NextResponse.json({ success: false }, { status: 200 })
+    // Log detailed error for debugging
+    console.error('Analytics tracking failed:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      code: (error as any)?.code,
+      detail: (error as any)?.detail
+    })
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Database connection error'
+    }, { status: 200 })
   }
 }
