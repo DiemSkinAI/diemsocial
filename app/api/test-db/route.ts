@@ -8,7 +8,7 @@ export async function GET() {
     databaseUrl: process.env.DATABASE_URL ? 'SET' : 'NOT SET',
     databaseUrlPreview: process.env.DATABASE_URL ? 
       `${process.env.DATABASE_URL.substring(0, 20)}...` : 'NOT SET',
-    tests: [] as Array<{name: string, status: string, error?: string, result?: any}>
+    tests: [] as Array<{name: string, status: string, error?: string, result?: unknown}>
   }
 
   // Test 1: Environment variables
