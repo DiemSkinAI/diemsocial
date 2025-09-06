@@ -53,11 +53,11 @@ export async function POST(request: NextRequest) {
 
     const result = await insertUserAnalytics({
       sessionId: analyticsData.sessionId,
-      frontFacePhoto: frontFacePhotoUrl,
-      sideFacePhoto: sideFacePhotoUrl,
-      fullBodyPhoto: fullBodyPhotoUrl,
+      frontFacePhoto: frontFacePhotoUrl || undefined,
+      sideFacePhoto: sideFacePhotoUrl || undefined,
+      fullBodyPhoto: fullBodyPhotoUrl || undefined,
       promptText: analyticsData.promptText,
-      generatedImage: generatedImageUrl,
+      generatedImage: generatedImageUrl || undefined,
       success: analyticsData.success,
       errorMessage: analyticsData.errorMessage,
       processingTime: analyticsData.processingTime
