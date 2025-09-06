@@ -26,6 +26,30 @@ function dataURLToFile(dataURL: string, filename?: string) {
   }
 }
 
+// Fetch image from URL and convert to Google AI format
+async function urlToFile(imageUrl: string) {
+  try {
+    const response = await fetch(imageUrl)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.status}`)
+    }
+    
+    const arrayBuffer = await response.arrayBuffer()
+    const base64Data = Buffer.from(arrayBuffer).toString('base64')
+    const mimeType = response.headers.get('content-type') || 'image/jpeg'
+    
+    return {
+      inlineData: {
+        data: base64Data,
+        mimeType: mimeType
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching image from URL:', error)
+    throw error
+  }
+}
+
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
@@ -60,14 +84,14 @@ export async function POST(request: NextRequest) {
       )
     }
     const formData = await request.formData()
-    const frontFaceImage = formData.get('frontFaceImage') as string
-    const sideFaceImage = formData.get('sideFaceImage') as string
-    const fullBodyImage = formData.get('fullBodyImage') as string
+    const frontFaceImageUrl = formData.get('frontFaceImageUrl') as string
+    const sideFaceImageUrl = formData.get('sideFaceImageUrl') as string
+    const fullBodyImageUrl = formData.get('fullBodyImageUrl') as string
     const description = formData.get('description') as string
 
     console.log(`[${new Date().toISOString()}] Form data extracted after ${Date.now() - startTime}ms`)
 
-    if (!frontFaceImage || !sideFaceImage || !fullBodyImage) {
+    if (!frontFaceImageUrl || !sideFaceImageUrl || !fullBodyImageUrl) {
       return NextResponse.json(
         { error: 'All three photos (front face, side face, full body) are required' },
         { status: 400 }
@@ -82,15 +106,15 @@ export async function POST(request: NextRequest) {
     }
 
 
-    // Prepare image data for Google AI
-    const frontFaceFile = dataURLToFile(frontFaceImage)
-    const sideFaceFile = dataURLToFile(sideFaceImage)
-    const fullBodyFile = dataURLToFile(fullBodyImage)
+    // Prepare image data for Google AI by fetching from URLs
+    console.log(`[${new Date().toISOString()}] Fetching images from Supabase storage`)
+    const [frontFaceFile, sideFaceFile, fullBodyFile] = await Promise.all([
+      urlToFile(frontFaceImageUrl),
+      urlToFile(sideFaceImageUrl),
+      urlToFile(fullBodyImageUrl)
+    ])
     
-    // Extract original image dimensions from base64 data
-    const base64Data = frontFaceImage.split(',')[1]
-    const buffer = Buffer.from(base64Data, 'base64')
-    console.log(`[${new Date().toISOString()}] Front face image buffer size: ${buffer.length} bytes`)
+    console.log(`[${new Date().toISOString()}] Images fetched and converted for Google AI`)
     
     const parts: Array<{inlineData: {data: string; mimeType: string}} | {text: string}> = [frontFaceFile, sideFaceFile, fullBodyFile]
 

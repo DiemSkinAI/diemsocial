@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Camera, ArrowUp, Sparkles, Download, Menu, X } from 'lucide-react'
 import { fileToBase64 } from '@/lib/imageUtils'
+import { uploadImageToStorage } from '@/lib/supabase'
 import CameraCapture from '@/components/CameraCapture'
 import Image from 'next/image'
 
@@ -116,17 +117,43 @@ export default function Home() {
     setError(null)
     const startTime = Date.now()
 
-    // Encode all three photos at full size (outside try block for error handling)
-    const frontBase64 = await fileToBase64(frontFaceImage)
-    const sideBase64 = await fileToBase64(sideFaceImage)
-    const fullBase64 = await fileToBase64(fullBodyImage)
+    // Upload images to Supabase first to avoid payload size limits
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const sessionPrefix = `${sessionId}_${timestamp}`
+
+    let frontImageUrl: string | null = null
+    let sideImageUrl: string | null = null
+    let fullImageUrl: string | null = null
+    let frontBase64: string = ''
+    let sideBase64: string = ''
+    let fullBase64: string = ''
 
     try {
+      // Upload images to Supabase storage
+      const [uploadedFront, uploadedSide, uploadedFull] = await Promise.all([
+        uploadImageToStorage(frontFaceImage, `${sessionPrefix}_front_face.jpg`),
+        uploadImageToStorage(sideFaceImage, `${sessionPrefix}_side_face.jpg`),
+        uploadImageToStorage(fullBodyImage, `${sessionPrefix}_full_body.jpg`)
+      ])
+
+      frontImageUrl = uploadedFront
+      sideImageUrl = uploadedSide
+      fullImageUrl = uploadedFull
+
+      if (!frontImageUrl || !sideImageUrl || !fullImageUrl) {
+        throw new Error('Failed to upload images to storage')
+      }
+
+      // Also create base64 for analytics (but don't send in API)
+      frontBase64 = await fileToBase64(frontFaceImage)
+      sideBase64 = await fileToBase64(sideFaceImage)
+      fullBase64 = await fileToBase64(fullBodyImage)
+
       const formData = new FormData()
       
-      formData.append('frontFaceImage', frontBase64)
-      formData.append('sideFaceImage', sideBase64)
-      formData.append('fullBodyImage', fullBase64)
+      formData.append('frontFaceImageUrl', frontImageUrl)
+      formData.append('sideFaceImageUrl', sideImageUrl)
+      formData.append('fullBodyImageUrl', fullImageUrl)
       
       formData.append('description', prompt)
       formData.append('sessionId', sessionId)
@@ -160,9 +187,9 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId,
-              frontFacePhoto: frontBase64,
-              sideFacePhoto: sideBase64,
-              fullBodyPhoto: fullBase64,
+              frontFacePhoto: frontImageUrl,
+              sideFacePhoto: sideImageUrl,
+              fullBodyPhoto: fullImageUrl,
               promptText: prompt,
               generatedImage: data.images?.[0]?.url || '',
               success: true,
@@ -200,9 +227,9 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId,
-              frontFacePhoto: frontBase64,
-              sideFacePhoto: sideBase64,
-              fullBodyPhoto: fullBase64,
+              frontFacePhoto: frontImageUrl || frontBase64,
+              sideFacePhoto: sideImageUrl || sideBase64,
+              fullBodyPhoto: fullImageUrl || fullBase64,
               promptText: prompt,
               success: false,
               errorMessage,

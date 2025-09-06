@@ -14,37 +14,43 @@ export async function POST(request: NextRequest) {
       processingTime: analyticsData.processingTime
     })
 
-    // Upload images to Supabase storage and get URLs
-    let frontFacePhotoUrl = null
-    let sideFacePhotoUrl = null
-    let fullBodyPhotoUrl = null
-    let generatedImageUrl = null
+    // Images are already uploaded to Supabase, just use the URLs or upload if base64 provided
+    let frontFacePhotoUrl = analyticsData.frontFacePhoto
+    let sideFacePhotoUrl = analyticsData.sideFacePhoto
+    let fullBodyPhotoUrl = analyticsData.fullBodyPhoto
+    let generatedImageUrl = analyticsData.generatedImage
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-    const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
-
-    if (analyticsData.frontFacePhoto) {
+    // If base64 data is provided instead of URL, upload to Supabase
+    if (analyticsData.frontFacePhoto && analyticsData.frontFacePhoto.startsWith('data:')) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
       frontFacePhotoUrl = await uploadBase64ImageToStorage(
         analyticsData.frontFacePhoto,
         `${sessionPrefix}_front_face.jpg`
       )
     }
 
-    if (analyticsData.sideFacePhoto) {
+    if (analyticsData.sideFacePhoto && analyticsData.sideFacePhoto.startsWith('data:')) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
       sideFacePhotoUrl = await uploadBase64ImageToStorage(
         analyticsData.sideFacePhoto,
         `${sessionPrefix}_side_face.jpg`
       )
     }
 
-    if (analyticsData.fullBodyPhoto) {
+    if (analyticsData.fullBodyPhoto && analyticsData.fullBodyPhoto.startsWith('data:')) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
       fullBodyPhotoUrl = await uploadBase64ImageToStorage(
         analyticsData.fullBodyPhoto,
         `${sessionPrefix}_full_body.jpg`
       )
     }
 
-    if (analyticsData.generatedImage) {
+    if (analyticsData.generatedImage && analyticsData.generatedImage.startsWith('data:')) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const sessionPrefix = `${analyticsData.sessionId}_${timestamp}`
       generatedImageUrl = await uploadBase64ImageToStorage(
         analyticsData.generatedImage,
         `${sessionPrefix}_generated.jpg`
