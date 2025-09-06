@@ -19,8 +19,31 @@ export default function Home() {
   const [currentPhotoType, setCurrentPhotoType] = useState<'front' | 'side' | 'full' | null>(null)
   const [isTyping, setIsTyping] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [sessionId] = useState(() => 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9))
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Track user session (production only)
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') return
+    
+    const trackSession = async () => {
+      try {
+        await fetch('/api/track-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+          })
+        })
+      } catch (error) {
+        console.log('Session tracking disabled (database not connected)')
+      }
+    }
+    trackSession()
+  }, [sessionId])
 
   const triggerBorderAnimation = () => {
     setShowBorderAnimation(true)
@@ -82,6 +105,7 @@ export default function Home() {
 
     setIsLoading(true)
     setError(null)
+    const startTime = Date.now()
 
     try {
       const formData = new FormData()
@@ -100,6 +124,7 @@ export default function Home() {
       formData.append('fullBodyImage', fullBase64)
       
       formData.append('description', prompt)
+      formData.append('sessionId', sessionId)
 
       const response = await fetch('/api/visualize', {
         method: 'POST',
@@ -116,9 +141,56 @@ export default function Home() {
         throw new Error(data.error || 'Failed to generate visualization')
       }
 
+      const processingTime = Date.now() - startTime
       setResults(data.images)
+
+      // Track successful generation (production only)
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          await fetch('/api/track-analytics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              frontFacePhoto: frontBase64.substring(0, 100) + '...', // Store preview only
+              sideFacePhoto: sideBase64.substring(0, 100) + '...',
+              fullBodyPhoto: fullBase64.substring(0, 100) + '...',
+              promptText: prompt,
+              generatedImage: data.images?.[0]?.url || null,
+              success: true,
+              processingTime
+            })
+          })
+        } catch (analyticsError) {
+          console.log('Analytics tracking disabled (database not connected)')
+        }
+      }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      const processingTime = Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      setError(errorMessage)
+
+      // Track failed generation (production only)
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          await fetch('/api/track-analytics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              frontFacePhoto: 'uploaded',
+              sideFacePhoto: 'uploaded', 
+              fullBodyPhoto: 'uploaded',
+              promptText: prompt,
+              success: false,
+              errorMessage,
+              processingTime
+            })
+          })
+        } catch (analyticsError) {
+          console.log('Analytics tracking disabled (database not connected)')
+        }
+      }
     } finally {
       setIsLoading(false)
     }
