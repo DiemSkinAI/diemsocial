@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Camera, ArrowUp, Sparkles, Image, Download, User, Menu, X } from 'lucide-react'
+import { Camera, ArrowUp, Sparkles, Download, Menu, X } from 'lucide-react'
 import { compressImage, fileToBase64 } from '@/lib/imageUtils'
 import CameraCapture from '@/components/CameraCapture'
 
@@ -227,7 +227,7 @@ export default function Home() {
           <div className="mt-8">
             <div className="backdrop-blur-sm rounded-3xl border border-gray-700/30 p-4" style={{ backgroundColor: '#1D1E26' }}>
               <p className="text-gray-400 text-center">
-                Want another look with the same photos? Click "Try Another" • Want to use different photos? Click "New Photos"
+                Want another look with the same photos? Click &quot;Try Another&quot; • Want to use different photos? Click &quot;New Photos&quot;
               </p>
             </div>
           </div>
