@@ -39,7 +39,7 @@ export default function Privacy() {
             <div className="space-y-4">
               <p>
                 <strong className="text-white">No Storage:</strong> Every photo you upload is processed 
-                immediately and then permanently deleted from our servers. We don't save, store, or keep 
+                immediately and then permanently deleted from our servers. We don&apos;t save, store, or keep 
                 any copy of your personal photos.
               </p>
               
@@ -51,7 +51,7 @@ export default function Privacy() {
               <p>
                 <strong className="text-white">Generated Results:</strong> Even the photos we create for 
                 you are automatically removed from our servers after generation. Download your result 
-                immediately, as we don't store it.
+                immediately, as we don&apos;t store it.
               </p>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function Privacy() {
               </p>
               
               <p>
-                <strong className="text-white">No Analytics Tracking:</strong> We don't track your usage 
+                <strong className="text-white">No Analytics Tracking:</strong> We don&apos;t track your usage 
                 patterns, build profiles, or use your data for advertising purposes.
               </p>
               
