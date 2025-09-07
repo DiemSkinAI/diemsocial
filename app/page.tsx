@@ -177,8 +177,8 @@ export default function Home() {
       const processingTime = Date.now() - startTime
       setResults(data.images)
 
-      // Track successful generation (production only)
-      if (window.location.hostname !== 'localhost') {
+      // Track successful generation (DISABLED FOR TESTING)
+      if (false && window.location.hostname !== 'localhost') {
         try {
           console.log('Tracking successful generation for session:', sessionId)
           
@@ -272,8 +272,8 @@ export default function Home() {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred'
       setError(errorMessage)
 
-      // Track failed generation (production only)
-      if (window.location.hostname !== 'localhost') {
+      // Track failed generation (DISABLED FOR TESTING)
+      if (false && window.location.hostname !== 'localhost') {
         try {
           console.log('Tracking failed generation for session:', sessionId)
           const analyticsResponse = await fetch('/api/track-analytics', {
