@@ -70,7 +70,7 @@ export default function Home() {
         })
         const result = await response.json()
         console.log('Session tracking result:', result)
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Session tracking error:', error)
       }
     }
@@ -228,7 +228,7 @@ export default function Home() {
                   resolve('failed_to_compress')
                 }
               })
-            } catch (error) {
+            } catch (error: unknown) {
               console.error('Error compressing generated image for analytics:', error)
               return 'failed_to_compress'
             }
@@ -267,7 +267,7 @@ export default function Home() {
           setError(`Analytics network error: ${error instanceof Error ? error.message : String(error)}`)
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       const processingTime = Date.now() - startTime
       const errorMessage = error instanceof Error ? error.message : 'An error occurred'
       setError(errorMessage)
@@ -299,7 +299,7 @@ export default function Home() {
             const analyticsResult = await analyticsResponse.json()
             console.log('Failed generation analytics tracking successful:', analyticsResult)
           }
-        } catch (analyticsError) {
+        } catch (analyticsError: unknown) {
           console.error('Analytics tracking error for failed generation:', analyticsError)
         }
       }
