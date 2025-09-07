@@ -1,0 +1,14 @@
+# Correctly formatted Database URL for Vercel production environment:
+
+DATABASE_URL=postgresql://diemvision_production_db_user:fcnYmiTEk6AomrL3S3x64bhAMRRV5e2m@dpg-d2ua1k7fte5s73avjp4g-a.oregon-postgres.render.com:5432/diemvision_production_db?sslmode=require
+
+# Instructions:
+# 1. Copy the DATABASE_URL line above
+# 2. Go to your Vercel project settings
+# 3. Navigate to Environment Variables
+# 4. Add:
+#    Name: DATABASE_URL
+#    Value: postgresql://diemvision_production_db_user:fcnYmiTEk6AomrL3S3x64bhAMRRV5e2m@dpg-d2ua1k7fte5s73avjp4g-a.oregon-postgres.render.com:5432/diemvision_production_db?sslmode=require
+#    Environment: Production
+# 5. Deploy your app
+# 6. Visit https://your-app.vercel.app/admin and click "Initialize Database"
