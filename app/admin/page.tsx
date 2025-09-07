@@ -18,27 +18,46 @@ interface AnalyticsData {
   ip_address?: string
 }
 
+interface PaginationInfo {
+  total: number
+  page: number
+  limit: number
+  pages: number
+}
+
 export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<AnalyticsData[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedEntry, setSelectedEntry] = useState<AnalyticsData | null>(null)
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    total: 0,
+    page: 1,
+    limit: 50,
+    pages: 0
+  })
 
   useEffect(() => {
     fetchAnalytics()
   }, [])
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (page = 1, limit = 50) => {
     try {
-      const response = await fetch('/api/admin/analytics')
+      setLoading(true)
+      const response = await fetch(`/api/admin/analytics?page=${page}&limit=${limit}`)
       const data = await response.json()
       if (data.success) {
         setAnalytics(data.data)
+        setPagination(data.pagination)
       }
     } catch (error) {
       console.error('Error fetching analytics:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handlePageChange = (newPage: number) => {
+    fetchAnalytics(newPage, pagination.limit)
   }
 
   const initializeDatabase = async () => {
@@ -87,7 +106,12 @@ export default function AdminDashboard() {
             {/* Analytics List */}
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b">
-                <h2 className="text-xl font-semibold">User Sessions ({analytics.length})</h2>
+                <h2 className="text-xl font-semibold">
+                  User Sessions ({pagination.total} total)
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Showing {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} sessions
+                </p>
               </div>
               <div className="max-h-96 overflow-y-auto">
                 {analytics.map((entry) => (
@@ -116,6 +140,56 @@ export default function AdminDashboard() {
                   </div>
                 ))}
               </div>
+              
+              {/* Pagination Controls */}
+              {pagination.pages > 1 && (
+                <div className="p-4 border-t flex items-center justify-between">
+                  <button
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                    className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  
+                  <div className="flex items-center space-x-2">
+                    {Array.from({ length: Math.min(pagination.pages, 7) }, (_, i) => {
+                      let pageNum;
+                      if (pagination.pages <= 7) {
+                        pageNum = i + 1;
+                      } else if (pagination.page <= 4) {
+                        pageNum = i + 1;
+                      } else if (pagination.page >= pagination.pages - 3) {
+                        pageNum = pagination.pages - 6 + i;
+                      } else {
+                        pageNum = pagination.page - 3 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`px-3 py-1 text-sm rounded ${
+                            pagination.page === pageNum
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <button
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    disabled={pagination.page === pagination.pages}
+                    className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Selected Entry Details */}
