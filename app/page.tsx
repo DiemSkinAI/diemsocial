@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Camera, ArrowUp, Sparkles, Download, Menu, X } from 'lucide-react'
 import { compressImage, fileToBase64 } from '@/lib/imageUtils'
 import CameraCapture from '@/components/CameraCapture'
@@ -22,6 +22,29 @@ export default function Home() {
   const [sessionId] = useState(() => 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9))
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Memoized object URLs to prevent re-rendering during typing
+  const frontFaceImageUrl = useMemo(() => 
+    frontFaceImage ? URL.createObjectURL(frontFaceImage) : null, 
+    [frontFaceImage]
+  )
+  const sideFaceImageUrl = useMemo(() => 
+    sideFaceImage ? URL.createObjectURL(sideFaceImage) : null, 
+    [sideFaceImage]
+  )
+  const fullBodyImageUrl = useMemo(() => 
+    fullBodyImage ? URL.createObjectURL(fullBodyImage) : null, 
+    [fullBodyImage]
+  )
+
+  // Cleanup object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (frontFaceImageUrl) URL.revokeObjectURL(frontFaceImageUrl)
+      if (sideFaceImageUrl) URL.revokeObjectURL(sideFaceImageUrl)
+      if (fullBodyImageUrl) URL.revokeObjectURL(fullBodyImageUrl)
+    }
+  }, [frontFaceImageUrl, sideFaceImageUrl, fullBodyImageUrl])
 
   // Track user session (production only)
   useEffect(() => {
@@ -356,7 +379,7 @@ export default function Home() {
         <div className="fixed top-4 left-4 z-50">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-3 rounded-lg bg-black/20 backdrop-blur-sm border border-white/20 hover:bg-black/40 transition-all"
+            className="p-3 rounded-lg bg-black/20 backdrop-blur-sm hover:bg-black/40 transition-all focus:outline-none"
           >
             {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
           </button>
@@ -452,7 +475,7 @@ export default function Home() {
         <div className="absolute md:fixed top-4 left-4 z-50">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-3 rounded-lg bg-black/20 backdrop-blur-sm border border-white/20 hover:bg-black/40 transition-all"
+            className="p-3 rounded-lg bg-black/20 backdrop-blur-sm hover:bg-black/40 transition-all focus:outline-none"
           >
             {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
           </button>
@@ -514,9 +537,9 @@ export default function Home() {
                     className="hidden"
                   />
                   <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-blue-500 transition-all text-center h-32 md:h-40 flex items-center justify-center" style={{ backgroundColor: '#1D1E26' }}>
-                    {frontFaceImage ? (
+                    {frontFaceImage && frontFaceImageUrl ? (
                       <div className="w-full h-20 md:h-28 relative overflow-hidden rounded-lg">
-                        <Image src={URL.createObjectURL(frontFaceImage)} alt="Front Face" className="object-cover" fill />
+                        <Image src={frontFaceImageUrl} alt="Front Face" className="object-cover" fill />
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center">
@@ -526,12 +549,21 @@ export default function Home() {
                     )}
                   </div>
                 </label>
-                <button
-                  onClick={() => handleCameraClick('front')}
-                  className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black/90 rounded-full transition-all"
-                >
-                  <Camera className="w-4 h-4 text-white" />
-                </button>
+                {frontFaceImage ? (
+                  <button
+                    onClick={() => setFrontFaceImage(null)}
+                    className="absolute top-2 right-2 p-1.5 bg-black/80 hover:bg-black/90 rounded-full transition-all"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleCameraClick('front')}
+                    className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black/90 rounded-full transition-all"
+                  >
+                    <Camera className="w-4 h-4 text-white" />
+                  </button>
+                )}
               </div>
 
               {/* Side Face Upload */}
@@ -544,9 +576,9 @@ export default function Home() {
                     className="hidden"
                   />
                   <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-purple-500 transition-all text-center h-32 md:h-40 flex items-center justify-center" style={{ backgroundColor: '#1D1E26' }}>
-                    {sideFaceImage ? (
+                    {sideFaceImage && sideFaceImageUrl ? (
                       <div className="w-full h-20 md:h-28 relative overflow-hidden rounded-lg">
-                        <Image src={URL.createObjectURL(sideFaceImage)} alt="Side Face" className="object-cover" fill />
+                        <Image src={sideFaceImageUrl} alt="Side Face" className="object-cover" fill />
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center">
@@ -556,12 +588,21 @@ export default function Home() {
                     )}
                   </div>
                 </label>
-                <button
-                  onClick={() => handleCameraClick('side')}
-                  className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black/90 rounded-full transition-all"
-                >
-                  <Camera className="w-4 h-4 text-white" />
-                </button>
+                {sideFaceImage ? (
+                  <button
+                    onClick={() => setSideFaceImage(null)}
+                    className="absolute top-2 right-2 p-1.5 bg-black/80 hover:bg-black/90 rounded-full transition-all"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleCameraClick('side')}
+                    className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black/90 rounded-full transition-all"
+                  >
+                    <Camera className="w-4 h-4 text-white" />
+                  </button>
+                )}
               </div>
 
               {/* Full Body Upload */}
@@ -574,9 +615,9 @@ export default function Home() {
                     className="hidden"
                   />
                   <div className="backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-600 p-4 hover:border-green-500 transition-all text-center h-32 md:h-40 flex items-center justify-center" style={{ backgroundColor: '#1D1E26' }}>
-                    {fullBodyImage ? (
+                    {fullBodyImage && fullBodyImageUrl ? (
                       <div className="w-full h-20 md:h-28 relative overflow-hidden rounded-lg">
-                        <Image src={URL.createObjectURL(fullBodyImage)} alt="Full Body" className="object-cover" fill />
+                        <Image src={fullBodyImageUrl} alt="Full Body" className="object-cover" fill />
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center">
@@ -586,12 +627,21 @@ export default function Home() {
                     )}
                   </div>
                 </label>
-                <button
-                  onClick={() => handleCameraClick('full')}
-                  className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black/90 rounded-full transition-all"
-                >
-                  <Camera className="w-4 h-4 text-white" />
-                </button>
+                {fullBodyImage ? (
+                  <button
+                    onClick={() => setFullBodyImage(null)}
+                    className="absolute top-2 right-2 p-1.5 bg-black/80 hover:bg-black/90 rounded-full transition-all"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleCameraClick('full')}
+                    className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black/90 rounded-full transition-all"
+                  >
+                    <Camera className="w-4 h-4 text-white" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -680,14 +730,14 @@ export default function Home() {
 
         </div>
         
-        {/* Made in Toronto badge - at bottom of page content */}
-        <div className="flex justify-end p-4">
+        {/* Made in Toronto badge - fixed bottom right corner */}
+        <div className="fixed bottom-4 right-4 z-40 hidden md:block">
           <Image 
             src="/toronto.png" 
             alt="Made in Toronto" 
-            className="w-12 md:w-16 opacity-60 hover:opacity-80 transition-opacity"
-            width={64}
-            height={64}
+            className="w-16 md:w-20 opacity-60 hover:opacity-80 transition-opacity"
+            width={80}
+            height={80}
             style={{
               width: 'auto',
               height: 'auto'
