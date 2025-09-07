@@ -159,6 +159,59 @@ export default function Home() {
         try {
           console.log('Tracking successful generation for session:', sessionId)
           
+          // Compress generated image for analytics only
+          const compressGeneratedImageForAnalytics = async (imageUrl: string): Promise<string> => {
+            try {
+              const img = document.createElement('img')
+              img.src = imageUrl
+              
+              return new Promise((resolve) => {
+                img.onload = () => {
+                  const canvas = document.createElement('canvas')
+                  const ctx = canvas.getContext('2d')
+                  
+                  if (!ctx) {
+                    resolve(imageUrl)
+                    return
+                  }
+                  
+                  // Resize to smaller dimensions for analytics (max 400px)
+                  const maxSize = 400
+                  let { width, height } = img
+                  
+                  if (width > height) {
+                    if (width > maxSize) {
+                      height = (height * maxSize) / width
+                      width = maxSize
+                    }
+                  } else {
+                    if (height > maxSize) {
+                      width = (width * maxSize) / height
+                      height = maxSize
+                    }
+                  }
+                  
+                  canvas.width = width
+                  canvas.height = height
+                  
+                  // Draw and compress for analytics
+                  ctx.drawImage(img, 0, 0, width, height)
+                  const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7)
+                  resolve(compressedBase64)
+                }
+                
+                img.onerror = () => {
+                  console.error('Failed to compress generated image for analytics')
+                  resolve('failed_to_compress')
+                }
+              })
+            } catch (error) {
+              console.error('Error compressing generated image for analytics:', error)
+              return 'failed_to_compress'
+            }
+          }
+          
+          const compressedGeneratedImage = await compressGeneratedImageForAnalytics(data.images?.[0]?.url || '')
           
           const analyticsResponse = await fetch('/api/track-analytics', {
             method: 'POST',
@@ -169,7 +222,7 @@ export default function Home() {
               sideFacePhoto: sideBase64,
               fullBodyPhoto: fullBase64,
               promptText: prompt,
-              generatedImage: data.images?.[0]?.url || '',
+              generatedImage: compressedGeneratedImage,
               success: true,
               processingTime
             })
