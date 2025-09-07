@@ -16,9 +16,9 @@ export const metadata: Metadata = {
   title: "DiemSocial",
   description: "Your photos, on another level",
   icons: {
-    icon: "/diem-logo.png",
-    shortcut: "/diem-logo.png",
-    apple: "/diem-logo.png",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
