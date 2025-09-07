@@ -264,13 +264,13 @@ export default function Home() {
         } catch (error: unknown) {
           console.error('Analytics tracking network error:', error)
           // Show visible error to user temporarily for debugging
-          const errorMessage = error instanceof Error ? error.message : String(error)
-          setError(`Analytics network error: ${errorMessage}`)
+          const errorMsg = error instanceof Error ? error.message : String(error)
+          setError(`Analytics network error: ${errorMsg}`)
         }
       }
     } catch (error: unknown) {
       const processingTime = Date.now() - startTime
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = error instanceof Error ? error.message : String(error)
       setError(errorMessage)
 
       // Track failed generation (DISABLED FOR TESTING)
