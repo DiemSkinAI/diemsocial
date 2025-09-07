@@ -264,7 +264,7 @@ export default function Home() {
         } catch (error) {
           console.error('Analytics tracking network error:', error)
           // Show visible error to user temporarily for debugging
-          setError(`Analytics network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+          setError(`Analytics network error: ${error instanceof Error ? error.message : String(error)}`)
         }
       }
     } catch (error) {
