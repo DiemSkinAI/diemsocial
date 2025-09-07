@@ -261,7 +261,7 @@ export default function Home() {
             const analyticsResult = await analyticsResponse.json()
             console.log('Analytics tracking successful:', analyticsResult)
           }
-        } catch (error) {
+        } catch (error: unknown) {
           console.error('Analytics tracking network error:', error)
           // Show visible error to user temporarily for debugging
           setError(`Analytics network error: ${error instanceof Error ? error.message : String(error)}`)
