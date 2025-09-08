@@ -769,8 +769,8 @@ export default function Home() {
         </div>
         
         {/* Made in Toronto badge and Diem logo - at bottom of content */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-4">
-          {/* Privacy link on the left */}
+        <div className="absolute bottom-4 right-4 flex items-center gap-4">
+          {/* Privacy link beside Diem logo */}
           <button 
             onClick={() => router.push('/privacy')}
             className="text-gray-400 hover:text-white transition-colors text-sm md:text-base"
@@ -778,12 +778,12 @@ export default function Home() {
             Privacy
           </button>
           
-          {/* Logo section on the right */}
+          {/* Logo section */}
           <div className="flex items-center gap-3">
             <Image 
               src="/diem-logo.png" 
               alt="Diem Logo" 
-              className="w-8 md:w-15 opacity-60 hover:opacity-80 transition-opacity mr-6"
+              className="w-8 md:w-15 opacity-60 hover:opacity-80 transition-opacity"
               width={60}
               height={60}
               style={{
