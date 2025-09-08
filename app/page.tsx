@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
-import { Camera, ArrowUp, Sparkles, Download, Menu, X } from 'lucide-react'
+import { Camera, ArrowUp, Sparkles, Download, Menu, X, Info, AlertCircle } from 'lucide-react'
 import { compressImage, fileToBase64 } from '@/lib/imageUtils'
 import CameraCapture from '@/components/CameraCapture'
 import Image from 'next/image'
@@ -26,6 +26,8 @@ export default function Home() {
   const [currentPhotoType, setCurrentPhotoType] = useState<'front' | 'side' | 'full' | null>(null)
   const [isTyping, setIsTyping] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [showPhotoTipBanner, setShowPhotoTipBanner] = useState(true)
+  const [showPhotoTipsModal, setShowPhotoTipsModal] = useState(false)
   const [sessionId] = useState(() => 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9))
   const router = useRouter()
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -53,6 +55,19 @@ export default function Home() {
       if (fullBodyImageUrl) URL.revokeObjectURL(fullBodyImageUrl)
     }
   }, [frontFaceImageUrl, sideFaceImageUrl, fullBodyImageUrl])
+
+  // Check localStorage for photo tip banner dismissal
+  useEffect(() => {
+    const dismissed = localStorage.getItem('photoTipBannerDismissed')
+    if (dismissed === 'true') {
+      setShowPhotoTipBanner(false)
+    }
+  }, [])
+
+  const handleDismissPhotoTipBanner = () => {
+    setShowPhotoTipBanner(false)
+    localStorage.setItem('photoTipBannerDismissed', 'true')
+  }
 
   // Track user session (production only)
   useEffect(() => {
@@ -562,8 +577,37 @@ export default function Home() {
 
         {/* Main Input Area */}
         <div className="w-full max-w-2xl">
+          {/* Photo Tip Banner */}
+          {showPhotoTipBanner && (
+            <div className="mb-4 p-3 bg-gray-800/30 border border-gray-700 rounded-lg flex items-start justify-between">
+              <div className="flex items-start gap-2 flex-1">
+                <Info className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-gray-300">
+                  <span className="font-semibold text-white">Pro tip:</span> For best results, use natural photos taken by others from 3-5 feet away. Avoid close-up selfies.
+                </div>
+              </div>
+              <button
+                onClick={handleDismissPhotoTipBanner}
+                className="p-1 hover:bg-gray-700/50 rounded transition-colors ml-2"
+                aria-label="Dismiss tip"
+              >
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
+            </div>
+          )}
+          
           {/* Photo Upload Section */}
           <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm text-gray-400">Upload your photos</h3>
+              <button
+                onClick={() => setShowPhotoTipsModal(true)}
+                className="flex items-center gap-1 text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                <Info className="w-4 h-4" />
+                Photo Tips
+              </button>
+            </div>
             <div className="grid grid-cols-3 gap-4">
               {/* Front Face Upload */}
               <div className="relative">
@@ -793,6 +837,68 @@ export default function Home() {
             }}
           />
         </div>
+
+        {/* Photo Tips Modal */}
+        {showPhotoTipsModal && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-800">
+              <div className="flex items-start justify-between mb-4">
+                <h2 className="text-xl font-semibold text-white">Photo Tips for Best Results</h2>
+                <button
+                  onClick={() => setShowPhotoTipsModal(false)}
+                  className="p-1 hover:bg-gray-800 rounded transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">1</div>
+                    <div>
+                      <h3 className="font-semibold text-white mb-1">Front Face Photo</h3>
+                      <p className="text-sm text-gray-300">Use a natural photo taken by someone else from 3-5 feet away. Avoid extreme close-ups or selfies. Good natural lighting and a clear view of your face work best.</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">2</div>
+                    <div>
+                      <h3 className="font-semibold text-white mb-1">Side Face Photo</h3>
+                      <p className="text-sm text-gray-300">A 45-degree angle works best. Again, have someone else take it from 3-5 feet away. This helps the AI understand your profile and facial structure.</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">3</div>
+                    <div>
+                      <h3 className="font-semibold text-white mb-1">Full Body Photo</h3>
+                      <p className="text-sm text-gray-300">A standing photo showing your full body, taken from 6-10 feet away. This helps generate accurate body proportions and posture.</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
+                  <p className="text-sm text-gray-300">
+                    <span className="font-semibold text-white">Remember:</span> The quality of your generated photos depends on the quality of your input photos. Natural photos with regular lighting produce the best results!
+                  </p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setShowPhotoTipsModal(false)}
+                className="mt-6 w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white font-medium"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   )
