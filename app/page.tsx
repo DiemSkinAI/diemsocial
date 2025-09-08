@@ -579,16 +579,16 @@ export default function Home() {
         <div className="w-full max-w-2xl">
           {/* Photo Tip Banner */}
           {showPhotoTipBanner && (
-            <div className="mb-4 p-3 bg-gray-800/30 border border-gray-700 rounded-lg flex items-start justify-between">
-              <div className="flex items-start gap-2 flex-1">
+            <div className="mb-4 p-3 bg-gray-800/30 border border-gray-700 rounded-lg flex items-start justify-between overflow-hidden">
+              <div className="flex items-start gap-2 flex-1 min-w-0">
                 <Info className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-gray-300">
+                <div className="text-sm text-gray-300 break-words">
                   <span className="font-semibold text-white">Pro tip:</span> For best results, use natural photos taken by others from 3-5 feet away. Avoid close-up selfies.
                 </div>
               </div>
               <button
                 onClick={handleDismissPhotoTipBanner}
-                className="p-1 hover:bg-gray-700/50 rounded transition-colors ml-2"
+                className="p-1 hover:bg-gray-700/50 rounded transition-colors ml-2 flex-shrink-0"
                 aria-label="Dismiss tip"
               >
                 <X className="w-4 h-4 text-gray-400" />
@@ -840,8 +840,8 @@ export default function Home() {
 
         {/* Photo Tips Modal */}
         {showPhotoTipsModal && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-800">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-800 max-h-[90vh] overflow-y-auto">
               <div className="flex items-start justify-between mb-4">
                 <h2 className="text-xl font-semibold text-white">Photo Tips for Best Results</h2>
                 <button
