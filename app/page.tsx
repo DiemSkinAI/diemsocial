@@ -769,7 +769,7 @@ export default function Home() {
         </div>
         
         {/* Made in Toronto badge and Diem logo - at bottom of content */}
-        <div className="mt-16 mb-4 md:mt-8 md:mb-8 flex justify-between items-center px-4">
+        <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-4">
           {/* Privacy link on the left */}
           <button 
             onClick={() => router.push('/privacy')}
