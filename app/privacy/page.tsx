@@ -127,7 +127,7 @@ export default function Privacy() {
           <Image 
             src="/diem-logo.png" 
             alt="Diem Logo" 
-            className="w-8 md:w-15 opacity-60 hover:opacity-80 transition-opacity mr-6"
+            className="w-4 md:w-15 opacity-60 hover:opacity-80 transition-opacity mr-6"
             width={60}
             height={60}
             style={{
@@ -138,7 +138,7 @@ export default function Privacy() {
           <Image 
             src="/toronto.png" 
             alt="Made in Toronto" 
-            className="w-10 md:w-20 opacity-60 hover:opacity-80 transition-opacity"
+            className="w-5 md:w-20 opacity-60 hover:opacity-80 transition-opacity"
             width={80}
             height={80}
             style={{
