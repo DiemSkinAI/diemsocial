@@ -769,40 +769,29 @@ export default function Home() {
         </div>
         
         {/* Made in Toronto badge and Diem logo - at bottom of content */}
-        <div className="absolute bottom-4 right-4 flex items-center gap-4">
-          {/* Privacy link beside Diem logo */}
-          <button 
-            onClick={() => router.push('/privacy')}
-            className="text-gray-400 hover:text-white transition-colors text-sm md:text-base"
-          >
-            Privacy
-          </button>
-          
-          {/* Logo section */}
-          <div className="flex items-center gap-3">
-            <Image 
-              src="/diem-logo.png" 
-              alt="Diem Logo" 
-              className="w-8 md:w-15 opacity-60 hover:opacity-80 transition-opacity"
-              width={60}
-              height={60}
-              style={{
-                width: 'auto',
-                height: 'auto'
-              }}
-            />
-            <Image 
-              src="/toronto.png" 
-              alt="Made in Toronto" 
-              className="w-10 md:w-20 opacity-60 hover:opacity-80 transition-opacity"
-              width={80}
-              height={80}
-              style={{
-                width: 'auto',
-                height: 'auto'
-              }}
-            />
-          </div>
+        <div className="mt-16 mb-4 md:mt-8 md:mb-8 flex justify-end items-center gap-3 pr-4">
+          <Image 
+            src="/diem-logo.png" 
+            alt="Diem Logo" 
+            className="w-8 md:w-15 opacity-60 hover:opacity-80 transition-opacity mr-6"
+            width={60}
+            height={60}
+            style={{
+              width: 'auto',
+              height: 'auto'
+            }}
+          />
+          <Image 
+            src="/toronto.png" 
+            alt="Made in Toronto" 
+            className="w-10 md:w-20 opacity-60 hover:opacity-80 transition-opacity"
+            width={80}
+            height={80}
+            style={{
+              width: 'auto',
+              height: 'auto'
+            }}
+          />
         </div>
       </div>
     </>
